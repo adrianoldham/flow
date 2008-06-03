@@ -207,7 +207,7 @@ Flow.ScrollBar = Class.create({
                 this.parent.target = this.parent.actualSize.x + this.velocity;
             }
             
-            if (Math.abs(this.velocity) < 1) {
+            if (Math.abs(this.velocity) < 0.1) {
                 this.velocity = null;
             }
         }
