@@ -10,16 +10,16 @@ var Flow = Class.create({
         
         this.setup();
         this.setupElements($$(selector));
-        this.setupScrollBar();
+        if (this.options.useScrollBar) this.setupScrollBar();
         
         this.target = this.focalPoint = this.actualSize.x / 2;
-        this.scrollBar.setPosition(this.target);
-        this.target = this.scrollBar.actualPosition();
+        
+        if (this.options.useScrollBar) {
+            this.scrollBar.setPosition(this.target);
+            this.target = this.scrollBar.actualPosition();
+        }
         
         new PeriodicalExecuter(this.update.bind(this), 0.01);
-        
-        this.autoScroller = new PeriodicalExecuter(this.autoScroll.bind(this), this.options.autoScrollDelay);
-        if (!this.options.autoScrollAtStart) this.autoScroller.stop();
     },
     
     setup: function() {        
@@ -30,11 +30,24 @@ var Flow = Class.create({
         
         this.size = { x: this.container.getWidth(), y: this.container.getHeight() };
         this.focalPoint = 0;
+        this.mouseScrollAmount = 0;
         
-        this.mouseMoveIt(this.container);
-        
+        this.container.observe("mousemove", this.mouseScroll.bind(this));
         this.container.observe("mouseover", this.mouseEnter.bind(this)(this.containerEnter.bindAsEventListener(this)));
         this.container.observe("mouseout", this.mouseEnter.bind(this)(this.containerLeave.bindAsEventListener(this)));
+        
+        this.autoScroller = new PeriodicalExecuter(this.autoScroll.bind(this), this.options.autoScrollDelay);
+        if (!this.options.autoScrollAtStart) this.autoScroller.stop();
+    },
+    
+    mouseScroll: function(event) {
+        if (!this.options.useMouseScroll) return;
+        
+        if (this.scrollBar && this.scrollBar.dragging) {
+            this.mouseScrollAmount = 0;
+        } else {
+            this.mouseScrollAmount = ((event.pageX - this.position.x) - this.size.x / 2) * this.options.mouseScrollSensitivity;
+        }
     },
     
     mouseEnter: function(handler) {
@@ -48,6 +61,8 @@ var Flow = Class.create({
     },
     
     toggleScrollBar: function(show) {
+        if (!this.options.useScrollBar) return;
+        
         if (this.scrollBarEffect) this.scrollBarEffect.cancel();
         var effect = show ? Effect.Appear : Effect.Fade;
         this.scrollBarEffect = new effect(this.scrollBar.scrollBar, { duration: 0.25 });   
@@ -58,29 +73,26 @@ var Flow = Class.create({
     },
     
     containerLeave: function(event) {
+        this.mouseScrollAmount = 0;
+        
+        if (!this.options.useScrollBar) return;
+        
         if (event.relatedTarget == this.scrollBar.scrollBar || 
             event.relatedTarget.descendantOf(this.scrollBar.scrollBar)) return;
+        
+        this.setPosition(this.target);
         if (this.options.autoHideScrollBar) this.toggleScrollBar(false);
     },
     
-    mouseMoveIt: function(element) {
-        element.childElements().each(function(child) {
-            child.observe("mousemove", function() {
-                $(child.parentNode).fire("mousemove");
-            });
-            this.mouseMoveIt(child);
-        }.bind(this));
-    },
-    
-    update: function() {
+    update: function() {        
         this.focalPoint += (this.target - this.focalPoint) / this.options.scrollCatchUp;
         this.container.scrollLeft = this.focalPoint + this.offset;
         
-        if (this.focalPoint > this.actualSize.x) {
-            this.target = this.actualSize.x;
+        if (this.mouseScrollAmount != 0 && (!this.scrollBar || this.scrollBar.velocity == null)) {
+            this.setPosition(this.target + this.mouseScrollAmount, false);
         }
         
-        this.scrollBar.update();
+        if (this.options.useScrollBar) this.scrollBar.update();
         
         /*this.elements.each(function(flowElement) {
             flowElement.update();
@@ -119,6 +131,10 @@ var Flow = Class.create({
             this.wrapper.appendChild(element);
             
             previous = flowElement;
+            
+            if (this.biggestElement == null || flowElement.size.x > this.biggestElement.size.x) {
+                this.biggestElement = flowElement;
+            }
         }.bind(this));
         
         var lastElement = this.elements.last();
@@ -137,10 +153,7 @@ var Flow = Class.create({
     },
     
     autoScroll: function() {
-        this.target += this.elements.first().size.x;
-        this.clampTarget();
-        
-        this.scrollBar.setPosition(this.target);       
+        this.setPosition(this.target + this.biggestElement.size.x);
     },
     
     clampTarget: function() {
@@ -153,19 +166,28 @@ var Flow = Class.create({
     },
     
     setPage: function(page) {
-        this.target = this.size.x * (page - 1);
+        this.setPosition(this.size.x * (page - 1));
     },
     
     previousPage: function() {
-        this.target -= this.size.x;
-        this.clampTarget();
-        this.scrollBar.setPosition(this.target);
+        this.setPosition(this.target - this.size.x);
     },
     
     nextPage: function() {
-        this.target += this.size.x;
+        this.setPosition(this.target + this.size.x);
+    },
+    
+    setPosition: function(target, snap) {
+        this.velocity = null;
+        this.target = target;
         this.clampTarget();
-        this.scrollBar.setPosition(this.target);
+        
+        if (snap == null) snap = this.options.scrollSnap;
+        
+        if (this.options.useScrollBar) {
+            this.scrollBar.setPosition(this.target);
+            if (snap) this.target = this.scrollBar.snap(this.target);
+        }
     }
 });
 
@@ -207,9 +229,7 @@ Flow.ScrollBar = Class.create({
                 this.parent.target = this.parent.actualSize.x + this.velocity;
             }
             
-            if (Math.abs(this.velocity) < 0.1) {
-                this.velocity = null;
-            }
+            if (Math.abs(this.velocity) < 0.01) this.velocity = null;
         }
         
         this.scrollWidget.setStyle({
@@ -223,6 +243,7 @@ Flow.ScrollBar = Class.create({
     
     setup: function() {
         this.scrollBar.observe("click", function(event) {
+            if (event.target != this.scrollWidget) this.dragOffset = 0;
             this.scrollPosition = this.positionFromMouse(event);
             this.parent.target = this.actualPosition();
         }.bind(this));
@@ -262,9 +283,7 @@ Flow.ScrollBar = Class.create({
         this.dragging = true;
     },
     
-    stopDrag: function(event) {
-        this.dragOffset = 0;
-            
+    stopDrag: function(event) {            
         if (this.mouseDelta) this.velocity = this.mouseDelta.x;
         
         if (Math.abs(this.velocity) > this.options.maxScrollVelocity) 
@@ -286,7 +305,7 @@ Flow.ScrollBar = Class.create({
     },
     
     snap: function(position) {
-        return Math.round(position / this.parent.elements.first().size.x) * this.parent.elements.first().size.x;
+        return Math.round(position / this.parent.biggestElement.size.x) * this.parent.biggestElement.size.x;
     }
 });
 
@@ -342,6 +361,8 @@ Flow.Element = Class.create({
 });
 
 Flow.DefaultOptions = {
+    useScrollBar: true,
+    useMouseScroll: true,
     scrollCatchUp: 20, 
     scrollBar: "scrollBar",
     scrollWidgetClass: "scroll-widget",
@@ -352,7 +373,8 @@ Flow.DefaultOptions = {
     autoScrollAtStart: false,
     autoScrollDelay: 2,
     autoHideScrollBar: true,
-    centerAtStart: true
+    centerAtStart: true,
+    mouseScrollSensitivity: 0.04
 };
 
 /*
