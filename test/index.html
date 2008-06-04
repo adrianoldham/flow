@@ -15,7 +15,7 @@
             background-color: #000;
         }
         
-        #container {
+        .container {
             width: 1200px;
             height: 300px;
             overflow: hidden;
@@ -26,7 +26,7 @@
             padding: 0 20px;
         }
         
-        #scrollBar {
+        .scroll-bar {
             position: absolute;
             left: 128px;
             width: 944px;
@@ -35,22 +35,22 @@
             background: transparent url(images/scrollbar.png) no-repeat;
         }
         
-        #scrollBar .scroll-widget {
+        .scroll-bar .scroll-widget {
             position: absolute;
             width: 181px;
             height: 19px;
             background: transparent url(images/scroll_widget.png) no-repeat;
         }
         
-        .albums {
+        #flow {
             position: relative;
         }
     </style>
 </head>
 <body>
     
-    <div class="albums">
-        <div id="container">
+    <div id="flow">
+        <div class="container">
             <img src="images/cover1.jpg"/>
             <img src="images/cover2.jpg"/>
             <img src="images/cover3.jpg"/>
@@ -92,7 +92,7 @@
             <img src="images/cover4.jpg"/>    
             <img src="images/cover5.jpg"/>
         </div>
-        <div id="scrollBar" style="display: none">
+        <div class="scroll-bar" style="display: none">
             <div class="scroll-widget"></div>
         </div>
         <div id="test" style="color: white"></div>
@@ -101,7 +101,7 @@
     <script type="text/javascript" charset="utf-8">
         var flow;
         function runTest() {
-            flow = new Flow("container", "#container img");
+            flow = new Flow("flow", "img");
         }
         Event.observe(window, "load", runTest);
     </script>

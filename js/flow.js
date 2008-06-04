@@ -1,15 +1,20 @@
 var Flow = Class.create({
-    initialize: function(container, selector, options) {
-        this.container = $(container);
+    initialize: function(wrapper, selector, options) {
+        this.wrapper = $(wrapper);
         this.options = Object.extend(Object.extend({}, Flow.DefaultOptions), options || {});
         
         this.offset = this.options.maxScrollVelocity;
+        
+        this.container = this.wrapper.getElementsBySelector("." + this.options.containerClass).first();
+        
+        if (this.previousButton) this.leftButton.observe("click", this.previousPage.bind(this));
+        if (this.nextButton) this.leftButton.observe("click", this.nextPage.bind(this));
         
         var temp = this.container.cumulativeOffset();
         this.position = { x: temp[0], y: temp[1] };
         
         this.setup();
-        this.setupElements($$(selector));
+        this.setupElements(this.container.getElementsBySelector(selector));
         if (this.options.useScrollBar) this.setupScrollBar();
         
         this.target = this.focalPoint = this.actualSize.x / 2;
@@ -94,9 +99,9 @@ var Flow = Class.create({
         
         if (this.options.useScrollBar) this.scrollBar.update();
         
-        /*this.elements.each(function(flowElement) {
+        this.elements.each(function(flowElement) {
             flowElement.update();
-        });*/
+        });
     },
     
     setupElements: function(elements) {
@@ -107,8 +112,8 @@ var Flow = Class.create({
             this.excess = { left: size, right: this.size.x - size };
         }
         
-        this.wrapper = new Element("div");
-        this.wrapper.setStyle({
+        this.holder = new Element("div");
+        this.holder.setStyle({
             position: "relative",
             height: this.size.y + "px"
         });
@@ -128,7 +133,7 @@ var Flow = Class.create({
             flowElement.update();
             
             this.elements.push(flowElement);
-            this.wrapper.appendChild(element);
+            this.holder.appendChild(element);
             
             previous = flowElement;
             
@@ -138,16 +143,18 @@ var Flow = Class.create({
         }.bind(this));
         
         var lastElement = this.elements.last();
-        this.wrapper.setStyle({
+        this.holder.setStyle({
             width: (lastElement.center.x + lastElement.size.x / 2 + this.offset) + "px"
         });
         
-        this.container.appendChild(this.wrapper);
+        this.container.appendChild(this.holder);
         this.actualSize = { x: (this.elements.last().center.x - this.excess.right - this.offset), y: this.container.getHeight() };
     },
     
     setupScrollBar: function() {
-        this.scrollBar = new Flow.ScrollBar($(this.options.scrollBar), this.options);
+        var scrollBar = this.wrapper.getElementsBySelector("." + this.options.scrollBarClass).first();
+        
+        this.scrollBar = new Flow.ScrollBar(scrollBar, this.options);
         this.scrollBar.parent = this;
         this.scrollBar.setup();
     },
@@ -361,11 +368,12 @@ Flow.Element = Class.create({
 });
 
 Flow.DefaultOptions = {
+    containerClass: "container",
+    scrollBarClass: "scroll-bar",
+    scrollWidgetClass: "scroll-widget",
     useScrollBar: true,
     useMouseScroll: true,
     scrollCatchUp: 20, 
-    scrollBar: "scrollBar",
-    scrollWidgetClass: "scroll-widget",
     scrollSnap: true,
     scrollBarFriction: 0.9,
     maxScrollVelocity: 150,
