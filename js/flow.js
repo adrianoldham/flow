@@ -75,12 +75,12 @@ var Flow = Class.create({
     containerLeave: function(event) {
         this.mouseScrollAmount = 0;
         
+        this.setPosition(this.target);
         if (!this.options.useScrollBar) return;
         
         if (event.relatedTarget == this.scrollBar.scrollBar || 
             event.relatedTarget.descendantOf(this.scrollBar.scrollBar)) return;
         
-        this.setPosition(this.target);
         if (this.options.autoHideScrollBar) this.toggleScrollBar(false);
     },
     
@@ -273,7 +273,7 @@ Flow.ScrollBar = Class.create({
         return scrollPosition;
     },
     
-    startDrag: function(event) {        
+    startDrag: function(event) {
         this.dragOffset = 0;
         this.dragOffset = this.positionFromMouse(event) - this.clampedScrollPosition();
         
