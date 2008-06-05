@@ -17,7 +17,10 @@ var Flow = Class.create({
         this.setupElements(this.container.getElementsBySelector(selector));
         if (this.options.useScrollBar) this.setupScrollBar();
         
-        this.target = this.focalPoint = this.actualSize.x / 2;
+        if (this.options.centerAtStart)
+            this.target = this.focalPoint = this.actualSize.x / 2;
+        else
+            this.target = this.focalPoint = 0;
         
         if (this.options.useScrollBar) {
             this.scrollBar.setPosition(this.target);
@@ -25,6 +28,9 @@ var Flow = Class.create({
         }
         
         new PeriodicalExecuter(this.update.bind(this), 0.01);
+        
+        this.autoScroller = new PeriodicalExecuter(this.autoScroll.bind(this), this.options.autoScrollDelay);
+        if (!this.options.autoScrollAtStart) this.autoScroller.stop();
     },
     
     setup: function() {        
@@ -40,9 +46,6 @@ var Flow = Class.create({
         this.container.observe("mousemove", this.mouseScroll.bind(this));
         this.container.observe("mouseover", this.mouseEnter.bind(this)(this.containerEnter.bindAsEventListener(this)));
         this.container.observe("mouseout", this.mouseEnter.bind(this)(this.containerLeave.bindAsEventListener(this)));
-        
-        this.autoScroller = new PeriodicalExecuter(this.autoScroll.bind(this), this.options.autoScrollDelay);
-        if (!this.options.autoScrollAtStart) this.autoScroller.stop();
     },
     
     mouseScroll: function(event) {
@@ -51,7 +54,18 @@ var Flow = Class.create({
         if (this.scrollBar && this.scrollBar.dragging) {
             this.mouseScrollAmount = 0;
         } else {
-            this.mouseScrollAmount = ((event.pageX - this.position.x) - this.size.x / 2) * this.options.mouseScrollSensitivity;
+            if (this.autoScroller) this.autoScroller.stop();
+            
+            var sign = 0;
+            var temp = ((event.pageX - this.position.x) - this.size.x / 2);
+            if (temp != 0) sign = temp / (Math.abs(temp));
+            
+            temp = Math.abs(temp);
+            temp -= this.options.mouseScrollDeadZoneSize / 2;
+            
+            if (temp < 0) temp = 0;
+            
+            this.mouseScrollAmount = temp * sign * this.options.mouseScrollSensitivity;
         }
     },
     
@@ -142,9 +156,12 @@ var Flow = Class.create({
             }
         }.bind(this));
         
+        var offset = this.offset;
+        if (this.options.centerFocus) offset += this.size.x / 2;
+        
         var lastElement = this.elements.last();
         this.holder.setStyle({
-            width: (lastElement.center.x + lastElement.size.x / 2 + this.offset) + "px"
+            width: (lastElement.center.x + lastElement.size.x / 2 + offset) + "px"
         });
         
         this.container.appendChild(this.holder);
@@ -168,7 +185,7 @@ var Flow = Class.create({
         
         if (this.target > this.actualSize.x) {
             this.target = this.actualSize.x;     
-            this.autoScroller.stop();
+            if (this.autoScroller) this.autoScroller.stop();
         }
     },
     
@@ -378,11 +395,12 @@ Flow.DefaultOptions = {
     scrollBarFriction: 0.9,
     maxScrollVelocity: 150,
     centerFocus: false,
-    autoScrollAtStart: false,
+    autoScrollAtStart: true,
     autoScrollDelay: 2,
     autoHideScrollBar: true,
-    centerAtStart: true,
-    mouseScrollSensitivity: 0.04
+    centerAtStart: false,
+    mouseScrollSensitivity: 0.04,
+    mouseScrollDeadZoneSize: 500
 };
 
 /*
