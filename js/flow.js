@@ -88,9 +88,31 @@ var Flow = Class.create({
         this.size = { x: this.container.getWidth(), y: this.container.getHeight() };
         this.mouseScrollAmount = 0;
         
+        this.container.observe("mousewheel", this.mouseWheel.bind(this));
+        this.container.observe("DOMMouseScroll", this.mouseWheel.bind(this));    
         this.container.observe("mousemove", this.mouseScroll.bind(this));
         this.container.observe("mouseover", this.mouseEnter.bind(this)(this.containerEnter.bindAsEventListener(this)));
         this.container.observe("mouseout", this.mouseEnter.bind(this)(this.containerLeave.bindAsEventListener(this)));
+    },
+    
+    mouseWheel: function (event) {
+        var delta = 0;
+        if (!event) event = window.event;
+        if (event.wheelDelta) {
+            delta = event.wheelDelta / 120;
+            if (window.opera) delta = -delta;
+        } else if (event.detail) {
+            delta = -event.detail / 3;
+        }
+
+        if (delta) {
+            this.setPosition(this.target + (delta * this.biggestElement.size.x));
+            if (this.autoScroller) this.autoScroller.stop();
+        }
+
+        if (event.preventDefault) event.preventDefault();
+
+        event.returnValue = false;
     },
     
     mouseScroll: function(event) {
@@ -121,6 +143,7 @@ var Flow = Class.create({
         return function(event) {
             var relatedTarget = event.relatedTarget;
             if (relatedTarget == null) return;
+            if (!relatedTarget.descendantOf) return;
 
             if (this === relatedTarget || relatedTarget.descendantOf(this)) return;
             handler.call(this, event);
@@ -146,8 +169,10 @@ var Flow = Class.create({
         this.setPosition(this.target);
         if (!this.options.useScrollBar) return;
         
-        if (event.relatedTarget == this.scrollBar.scrollBar || 
-            event.relatedTarget.descendantOf(this.scrollBar.scrollBar)) return;
+        if (this.scrollBar) {
+            if (event.relatedTarget == this.scrollBar.scrollBar || 
+                event.relatedTarget.descendantOf(this.scrollBar.scrollBar)) return;
+        }
         
         if (this.options.autoHideScrollBar) this.toggleScrollBar(false);
     },
@@ -226,6 +251,8 @@ var Flow = Class.create({
             this.scrollBar = new Flow.ScrollBar(scrollBar, this.options);
             this.scrollBar.parent = this;
             this.scrollBar.setup();
+            
+            scrollBar.observe("mousewheel", this.mouseWheel.bind(this));
         } else {            
             this.options.useScrollBar = false;
         }
