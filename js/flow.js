@@ -108,7 +108,10 @@ var Flow = Class.create({
             temp = Math.abs(temp);
             temp -= this.options.mouseScrollDeadZoneSize / 2;
             
-            if (temp < 0) temp = 0;
+            if (temp < 0) {
+                temp = 0;
+                this.setPosition(this.target);
+            }
             
             this.mouseScrollAmount = temp * sign * this.options.mouseScrollSensitivity;
         }
@@ -137,10 +140,9 @@ var Flow = Class.create({
     },
     
     containerLeave: function(event) {
+        if (this.mouseScrollAmount != 0) this.setPosition(this.target);
         this.mouseScrollAmount = 0;
         
-        // bug here (also need to snap when in dead zone)
-        // bug scroll bar moves back after throwing then mouse scroll
         this.setPosition(this.target);
         if (!this.options.useScrollBar) return;
         
@@ -279,8 +281,8 @@ var Flow = Class.create({
         if (snap == null) snap = this.options.scrollSnap;
         
         if (this.options.useScrollBar) {
-            this.scrollBar.setPosition(this.target);
             if (snap) this.target = this.scrollBar.snap(this.target);
+            this.scrollBar.setPosition(this.target);
         }
     },
     
