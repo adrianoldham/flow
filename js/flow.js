@@ -1,3 +1,42 @@
+// precheck if IE
+var isIE = (/MSIE (5\.5|6\.)/.test(navigator.userAgent) && navigator.platform == "Win32");
+
+Element.addMethods({ 
+    iePNGFix: function(element, blankPixel) {
+        if (!isIE) return;
+        
+        if (element.complete != null) {
+            if (element.src == blankPixel) return;        
+            if (!["png"].include(element.src.toLowerCase().split('.').last())) return;
+            
+            // wait till image is preloaded
+            if (!element.complete) {
+                setTimeout(function(_element, _blankPixel) {
+                    _element.iePNGFix(_blankPixel);
+                }.bind(this, element, blankPixel), 100);
+
+                return;
+            }
+
+            element.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + element.src + "',sizingMethod='scale')";
+            element.style.width = element.width + "px";
+            element.style.height = element.height + "px";
+            element.src = blankPixel || "/images/blank.gif";
+        } else {
+            var src = $(element).getStyle("backgroundImage");
+            var startIndex = src.indexOf("(\"") + 2;
+            var length = src.indexOf("\")");
+            src = src.substring(startIndex, length);
+            
+            if (!["png"].include(src.toLowerCase().split('.').last())) return;
+
+            element.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + src + "',sizingMethod='scale')";
+            element.setStyle({ backgroundImage: "none" });
+        }
+    }
+});
+
+
 var Flow = Class.create({
     initialize: function(wrapper, selector, options) {
         this.wrapper = $(wrapper);
@@ -10,17 +49,19 @@ var Flow = Class.create({
         if (this.previousButton) this.leftButton.observe("click", this.previousPage.bind(this));
         if (this.nextButton) this.leftButton.observe("click", this.nextPage.bind(this));
         
-        var temp = this.container.cumulativeOffset();
-        this.position = { x: temp[0], y: temp[1] };
+        this.getPosition();
         
         this.setup();
         this.setupElements(this.container.getElementsBySelector(selector));
         if (this.options.useScrollBar) this.setupScrollBar();
+        this.setupPageButtons();
         
         if (this.options.centerAtStart)
             this.target = this.focalPoint = this.actualSize.x / 2;
         else
             this.target = this.focalPoint = 0;
+        
+        this.setPosition(this.target);
         
         if (this.options.useScrollBar) {
             this.scrollBar.setPosition(this.target);
@@ -33,6 +74,11 @@ var Flow = Class.create({
         if (!this.options.autoScrollAtStart) this.autoScroller.stop();
     },
     
+    getPosition: function() {
+        var temp = this.container.cumulativeOffset();
+        this.position = { x: temp[0], y: temp[1] };  
+    },
+    
     setup: function() {        
         this.container.setStyle({
             position: "relative",
@@ -40,7 +86,6 @@ var Flow = Class.create({
         });
         
         this.size = { x: this.container.getWidth(), y: this.container.getHeight() };
-        this.focalPoint = 0;
         this.mouseScrollAmount = 0;
         
         this.container.observe("mousemove", this.mouseScroll.bind(this));
@@ -94,6 +139,8 @@ var Flow = Class.create({
     containerLeave: function(event) {
         this.mouseScrollAmount = 0;
         
+        // bug here (also need to snap when in dead zone)
+        // bug scroll bar moves back after throwing then mouse scroll
         this.setPosition(this.target);
         if (!this.options.useScrollBar) return;
         
@@ -104,6 +151,8 @@ var Flow = Class.create({
     },
     
     update: function() {        
+        this.getPosition();
+        
         this.focalPoint += (this.target - this.focalPoint) / this.options.scrollCatchUp;
         this.container.scrollLeft = this.focalPoint + this.offset;
         
@@ -171,9 +220,13 @@ var Flow = Class.create({
     setupScrollBar: function() {
         var scrollBar = this.wrapper.getElementsBySelector("." + this.options.scrollBarClass).first();
         
-        this.scrollBar = new Flow.ScrollBar(scrollBar, this.options);
-        this.scrollBar.parent = this;
-        this.scrollBar.setup();
+        if (scrollBar) {
+            this.scrollBar = new Flow.ScrollBar(scrollBar, this.options);
+            this.scrollBar.parent = this;
+            this.scrollBar.setup();
+        } else {            
+            this.options.useScrollBar = false;
+        }
     },
     
     autoScroll: function() {
@@ -181,11 +234,28 @@ var Flow = Class.create({
     },
     
     clampTarget: function() {
-        if (this.target < 0) this.target = 0;
+        if (this.target <= 0) {
+            if (this.previousPageButton) {
+                this.previousPageButton.classNames().add(this.options.pagingDisabledClass);
+            }
+            this.target = 0;   
+        } else {
+            if (this.previousPageButton) {
+                this.previousPageButton.classNames().remove(this.options.pagingDisabledClass);
+            }
+        }
         
-        if (this.target > this.actualSize.x) {
+        if (this.target >= this.actualSize.x) {
+            if (this.nextPageButton) {
+                this.nextPageButton.classNames().add(this.options.pagingDisabledClass);
+            }
+            
             this.target = this.actualSize.x;     
             if (this.autoScroller) this.autoScroller.stop();
+        } else {
+            if (this.nextPageButton) {
+                this.nextPageButton.classNames().remove(this.options.pagingDisabledClass);
+            }
         }
     },
     
@@ -212,12 +282,32 @@ var Flow = Class.create({
             this.scrollBar.setPosition(this.target);
             if (snap) this.target = this.scrollBar.snap(this.target);
         }
+    },
+    
+    setupPageButtons: function() {
+        this.previousPageButton = this.wrapper.getElementsBySelector("." + this.options.previousPageClass).first();
+        this.nextPageButton = this.wrapper.getElementsBySelector("." + this.options.nextPageClass).first();
+        
+        if (this.previousPageButton) {
+            this.previousPageButton.iePNGFix();
+            this.previousPageButton.observe("click", this.previousPage.bind(this));
+            this.previousPageButton.observe("mouseover", this.previousPageButton.iePNGFix.bind(this.previousPageButton));
+        }
+        
+        if (this.nextPageButton) {
+            this.nextPageButton.iePNGFix();
+            this.nextPageButton.observe("click", this.nextPage.bind(this));
+            this.nextPageButton.observe("mouseover", this.nextPageButton.iePNGFix.bind(this.nextPageButton));
+        }
     }
 });
 
 Flow.ScrollBar = Class.create({
     initialize: function(scrollBar, options) {
         this.scrollBar = $(scrollBar);
+        //this.scrollBar.iePNGFix();
+        // bug: for some reason applying the fix to the scrollbar, breaks the scroll widgets events
+        
         this.options = options;
         
         if (this.scrollBar.style.display == "none") {
@@ -226,6 +316,7 @@ Flow.ScrollBar = Class.create({
         }
         
         this.scrollWidget = this.scrollBar.getElementsBySelector("." + this.options.scrollWidgetClass).first();
+        this.scrollWidget.iePNGFix();
         
         this.size = { x: this.scrollBar.getWidth() - this.scrollWidget.getWidth() };
         this.widgetSize = { x: this.scrollWidget.getWidth() };
@@ -256,9 +347,8 @@ Flow.ScrollBar = Class.create({
             if (Math.abs(this.velocity) < 0.01) this.velocity = null;
         }
         
-        this.scrollWidget.setStyle({
-            left: this.clampedScrollPosition() + "px"
-        });
+        var position = this.clampedScrollPosition();
+        this.scrollWidget.setStyle({ left: position + "px" });  
     },
     
     positionFromMouse: function(event) {
@@ -366,8 +456,8 @@ Flow.Element = Class.create({
         
         this.element.setStyle({
             left: drawPosition.x + "px",
-            top: drawPosition.y + "px",
-            zIndex: 30000 - parseInt(Math.abs(this.drawDistance))
+            top: drawPosition.y + "px"//,
+            //zIndex: 30000 - parseInt(Math.abs(this.drawDistance))
         });
     },
     
@@ -388,6 +478,9 @@ Flow.DefaultOptions = {
     containerClass: "container",
     scrollBarClass: "scroll-bar",
     scrollWidgetClass: "scroll-widget",
+    nextPageClass: "next-page",
+    previousPageClass: "previous-page",
+    pagingDisabledClass: "disabled",
     useScrollBar: true,
     useMouseScroll: true,
     scrollCatchUp: 20, 

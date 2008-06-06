@@ -13,6 +13,7 @@
     <style type="text/css" media="screen">
         body {
             background-color: #000;
+            text-align: center;
         }
         
         .container {
@@ -44,6 +45,33 @@
         
         #flow {
             position: relative;
+            width: 1200px;
+            height: 300px;
+            margin: auto;
+        }
+
+        .previous-page {
+            width: 30px;
+            height: 30px;
+            position: absolute;
+            left: -15px;
+            top: 135px;
+            background: transparent url(images/left.png) no-repeat;            
+            cursor: pointer;
+        }
+        
+        .disabled {
+            display: none;
+        }
+        
+        .next-page {
+            width: 30px;
+            height: 30px;
+            position: absolute;
+            right: -15px;
+            top: 135px;
+            background: transparent url(images/right.png) no-repeat;
+            cursor: pointer;     
         }
     </style>
 </head>
@@ -95,7 +123,9 @@
         <div class="scroll-bar" style="display: none">
             <div class="scroll-widget"></div>
         </div>
-        <div id="test" style="color: white"></div>
+        
+        <div class="previous-page"></div>
+        <div class="next-page"></div>
     </div>
     
     <script type="text/javascript" charset="utf-8">
