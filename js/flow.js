@@ -70,9 +70,13 @@ var Flow = Class.create({
         
         new PeriodicalExecuter(this.update.bind(this), 0.01);
         
+        this.startAutoScroll();
+    },
+    
+    startAutoScroll: function() {
         this.autoScroller = new PeriodicalExecuter(this.autoScroll.bind(this), this.options.autoScrollDelay);
         this.autoScrollAmount = this.biggestElement.size.x;
-        if (!this.options.autoScrollAtStart) this.autoScroller.stop();
+        if (!this.options.autoScroll) this.autoScroller.stop();  
     },
     
     getPosition: function() {
@@ -187,6 +191,11 @@ var Flow = Class.create({
         this.focalPoint += (this.target - this.focalPoint) / this.options.scrollCatchUp;
         this.container.scrollLeft = this.focalPoint + this.offset;
         
+        if (this.options.autoScroll && Math.abs(this.target - this.focalPoint) > 0.01) {
+            clearTimeout(this.autoScrollRestarter);
+            this.autoScrollRestarter = setTimeout(this.startAutoScroll.bind(this), 2000);
+        }
+        
         if (this.mouseScrollAmount != 0 && (!this.scrollBar || this.scrollBar.velocity == null)) {
             this.setPosition(this.target + this.mouseScrollAmount, false);
         }
@@ -264,7 +273,16 @@ var Flow = Class.create({
     
     autoScroll: function() {
         this.setPosition(this.target + this.autoScrollAmount);
-        if (this.target == 0  || this.target == this.actualSize.x) this.autoScrollAmount = -this.autoScrollAmount;
+        if (this.target == 0  || this.target == this.actualSize.x) {
+            switch (this.options.autoScrollFinishAction) {
+                case "rewind":
+                    this.target = 0;
+                    break;
+                case "reverse":
+                    this.autoScrollAmount = -this.autoScrollAmount;
+                    break;
+            }
+        }
     },
     
     clampTarget: function() {
@@ -523,12 +541,13 @@ Flow.DefaultOptions = {
     scrollBarFriction: 0.9,
     maxScrollVelocity: 150,
     centerFocus: false,
-    autoScrollAtStart: true,
+    autoScroll: true,
     autoScrollDelay: 2,
     autoHideScrollBar: true,
     centerAtStart: false,
     mouseScrollSensitivity: 0.04,
-    mouseScrollDeadZoneSize: 500
+    mouseScrollDeadZoneSize: 500,
+    autoScrollFinishAction: "rewind"
 };
 
 /*
