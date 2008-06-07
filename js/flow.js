@@ -71,6 +71,7 @@ var Flow = Class.create({
         new PeriodicalExecuter(this.update.bind(this), 0.01);
         
         this.autoScroller = new PeriodicalExecuter(this.autoScroll.bind(this), this.options.autoScrollDelay);
+        this.autoScrollAmount = this.biggestElement.size.x;
         if (!this.options.autoScrollAtStart) this.autoScroller.stop();
     },
     
@@ -88,8 +89,11 @@ var Flow = Class.create({
         this.size = { x: this.container.getWidth(), y: this.container.getHeight() };
         this.mouseScrollAmount = 0;
         
-        this.container.observe("mousewheel", this.mouseWheel.bind(this));
-        this.container.observe("DOMMouseScroll", this.mouseWheel.bind(this));    
+        if (this.options.useMouseWheel) {
+            this.container.observe("mousewheel", this.mouseWheel.bind(this));
+            this.container.observe("DOMMouseScroll", this.mouseWheel.bind(this));    
+        }
+        
         this.container.observe("mousemove", this.mouseScroll.bind(this));
         this.container.observe("mouseover", this.mouseEnter.bind(this)(this.containerEnter.bindAsEventListener(this)));
         this.container.observe("mouseout", this.mouseEnter.bind(this)(this.containerLeave.bindAsEventListener(this)));
@@ -106,7 +110,7 @@ var Flow = Class.create({
         }
 
         if (delta) {
-            this.setPosition(this.target + (delta * this.biggestElement.size.x));
+            this.setPosition(this.target - (delta * this.biggestElement.size.x));
             if (this.autoScroller) this.autoScroller.stop();
         }
 
@@ -259,7 +263,8 @@ var Flow = Class.create({
     },
     
     autoScroll: function() {
-        this.setPosition(this.target + this.biggestElement.size.x);
+        this.setPosition(this.target + this.autoScrollAmount);
+        if (this.target == 0  || this.target == this.actualSize.x) this.autoScrollAmount = -this.autoScrollAmount;
     },
     
     clampTarget: function() {
@@ -280,7 +285,7 @@ var Flow = Class.create({
             }
             
             this.target = this.actualSize.x;     
-            if (this.autoScroller) this.autoScroller.stop();
+            //if (this.autoScroller) this.autoScroller.stop();
         } else {
             if (this.nextPageButton) {
                 this.nextPageButton.classNames().remove(this.options.pagingDisabledClass);
@@ -510,6 +515,7 @@ Flow.DefaultOptions = {
     nextPageClass: "next-page",
     previousPageClass: "previous-page",
     pagingDisabledClass: "disabled",
+    useMouseWheel: true,
     useScrollBar: true,
     useMouseScroll: true,
     scrollCatchUp: 20, 
