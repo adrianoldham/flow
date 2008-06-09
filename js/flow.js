@@ -145,8 +145,10 @@ var Flow = Class.create({
         }
     },
      
-    scrollToIndex: function(index) {
-        this.setPosition(index * this.biggestElement.size.x);  
+    scrollToIndex: function(index, centerIt) {
+        var position = index * this.biggestElement.size.x;
+        if (!this.options.centerFocus) position -= this.size.x;
+        this.setPosition(position);  
     },
     
     scrollToElement: function(flowElement) {

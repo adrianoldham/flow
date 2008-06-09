@@ -1,25 +1,24 @@
 var FlowingPanorama = Class.create({
-    initialize: function(flowContainer, panoramaContainer, selector) {
+    initialize: function(flowContainer, panoramaContainer, selector, flowOptions, panoramaOptions) {
         this.panoramaContainer = $(panoramaContainer);
         this.flowContainer = $(flowContainer);
         
         this.anchors = $$(selector);
 
-        this.flow = new Flow(this.flowContainer, selector, {
+        this.flow = new Flow(this.flowContainer, selector, Object.extend(flowOptions || {}, {
             onFocus: function(element) {
                 this.panorama.set(this.flow.elements.index(element));
             }.bind(this),
-            autoScroll: false,
-            centerFocus: true
-        });
+            autoScroll: false
+        }));
                 
-        this.panorama = new Panorama(this.panoramaContainer, this.createImages(), {
+        this.panorama = new Panorama(this.panoramaContainer, this.createImages(), Object.extend(panoramaOptions || {},{
             onChange: function() {
                 if (this.panorama && !this.flow.isScrolling()) {
-                    this.flow.scrollToIndex(this.panorama.currentIndex());
+                    this.flow.scrollToIndex(this.panorama.currentIndex(), true);
                 }
             }.bind(this)
-        });
+        }));
     },
     
     createImages: function() {
