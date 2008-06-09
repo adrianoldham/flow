@@ -136,7 +136,7 @@ Panorama.Element = Class.create({
         this.scrollPosition += (this.target - this.scrollPosition) / this.parent.options.scrollCatchUp;        
         this.target -= this.scrollAmount;
         
-        if (this.scrollPosition > 0) this.scrollPosition = 0;
+        if (this.target > 0) this.target = 0;
         
         if (this.checkOverflow) {
             this.pixelsPerSecond = (1 / this.parent.options.updateDelay) * this.scrollAmount;
