@@ -177,9 +177,11 @@ var Flow = Class.create({
         
         this.elements.each(function(element) {
             element.element.classNames().remove(this.options.focusedClass);            
+            element.update();
         }.bind(this));
         
         flowElement.element.classNames().add(this.options.focusedClass);
+        flowElement.update();
     },
     
     autoScroll: function() {
