@@ -110,6 +110,8 @@ Panorama.Element = Class.create({
         this.parent.currentElement = this;
         this.checkOverflow = true;
         
+        this.target = 0;
+        this.scrollPosition = 0;
         this.element.setStyle({ 
             zIndex: this.parent.options.zIndex,
             left: 0,
@@ -122,23 +124,31 @@ Panorama.Element = Class.create({
         this.effect = new Effect.Appear(this.element, { afterFinish: function() {
             if (this.parent.previousElement) this.parent.previousElement.scroller.stop();
             this.parent.previousElement = this;
-            this.parent.options.onChange();
-        }.bind(this)});
+            this.parent.options.onChange(); }.bind(this),
+            duration: this.parent.options.transitionSpeed
+        });
         
         if (this.scroller) this.scroller.stop();
         this.scroller = new PeriodicalExecuter(this.update.bind(this), this.parent.options.updateDelay);
     },
     
     update: function() {
-        var position = parseInt(this.element.getStyle(this.direction) || 0);
-        this.element.style[this.direction] = (position - this.scrollAmount) + "px";
+        this.scrollPosition += (this.target - this.scrollPosition) / this.parent.options.scrollCatchUp;        
+        this.target -= this.scrollAmount;
+        
+        if (this.scrollPosition > 0) this.scrollPosition = 0;
         
         if (this.checkOverflow) {
             this.pixelsPerSecond = (1 / this.parent.options.updateDelay) * this.scrollAmount;
-            if (position < -this.size[Panorama.ATTRIBUTE[this.direction]] +
-                            this.parent.size[Panorama.ATTRIBUTE[this.direction]] +
-                            this.pixelsPerSecond) this.hide();
+            if (this.scrollPosition < -this.size[Panorama.ATTRIBUTE[this.direction]] +
+                this.parent.size[Panorama.ATTRIBUTE[this.direction]] +
+                this.pixelsPerSecond) {
+                this.hide();
+                return;
+            }
         }
+        
+        this.element.style[this.direction] = this.scrollPosition + "px";
     },
     
     hide: function(elementToShow) {
@@ -180,5 +190,7 @@ Panorama.DefaultOptions = {
     updateDelay: 0.05,
     mouseScrollDeadZoneSize: 100,
     mouseScrollSensitivity: 0.04,
+    transitionSpeed: 1,
+    scrollCatchUp: 20,
     onChange: function() {}
 };
