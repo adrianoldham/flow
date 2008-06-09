@@ -6,8 +6,7 @@ var Panorama = Class.create({
         if (typeof(images) == "string") images = $$(images);
         this.images = images;
         
-        this.setupContainer();
-        
+        this.setupContainer();        
         this.preloadImages();
     },
     
@@ -45,6 +44,9 @@ var Panorama = Class.create({
         });
         
         this.size = { x: this.container.getWidth(), y: this.container.getHeight() };
+        
+        var temp = this.container.cumulativeOffset();
+        this.position = { x: temp[0], y: temp[1] };
     },
     
     setupElements: function(elements) {
@@ -97,6 +99,11 @@ Panorama.Element = Class.create({
         this.size = { x: this.element.getWidth(), y: this.element.getHeight() };        
         
         this.direction = this.size.x < this.size.y ? Panorama.VERTICAL : Panorama.HORIZONTAL;
+        
+        this.parent.container.observe("mousemove", this.mouseScroll.bind(this));
+        this.parent.container.observe("mouseout", this.mouseLeave.bind(this));
+        
+        this.scrollAmount = this.parent.options.scrollSpeed;
     },
     
     show: function(showFirst) {
@@ -124,10 +131,10 @@ Panorama.Element = Class.create({
     
     update: function() {
         var position = parseInt(this.element.getStyle(this.direction) || 0);
-        this.element.style[this.direction] = (position - this.parent.options.scrollSpeed) + "px";
+        this.element.style[this.direction] = (position - this.scrollAmount) + "px";
         
         if (this.checkOverflow) {
-            this.pixelsPerSecond = (1 / this.parent.options.updateDelay) * this.parent.options.scrollSpeed;
+            this.pixelsPerSecond = (1 / this.parent.options.updateDelay) * this.scrollAmount;
             if (position < -this.size[Panorama.ATTRIBUTE[this.direction]] +
                             this.parent.size[Panorama.ATTRIBUTE[this.direction]] +
                             this.pixelsPerSecond) this.hide();
@@ -144,10 +151,30 @@ Panorama.Element = Class.create({
         element.show();
         
         this.checkOverflow = false;
+    },
+    
+    mouseScroll: function(event) {
+        if (!this.parent.options.useMouseScroll) return;
+        
+        var sign = 0;
+        var temp = ((event["page" + Panorama.ATTRIBUTE[this.direction].toUpperCase()] - this.parent.position[Panorama.ATTRIBUTE[this.direction]]) - this.parent.size[Panorama.ATTRIBUTE[this.direction]] / 2);
+        if (temp != 0) sign = temp / (Math.abs(temp));
+            
+        temp = Math.abs(temp);
+        temp -= this.parent.options.mouseScrollDeadZoneSize / 2;
+            
+        if (temp < 0) temp = 0;
+            
+        this.scrollAmount = temp * sign * this.parent.options.mouseScrollSensitivity;
+    },
+    
+    mouseLeave: function() {
+        this.scrollAmount = this.parent.options.scrollSpeed;
     }
 });
 
 Panorama.DefaultOptions = {
+    useMouseScroll: true,
     zIndex: 100,
     scrollSpeed: 1,
     updateDelay: 0.05,
