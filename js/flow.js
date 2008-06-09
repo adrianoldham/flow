@@ -168,14 +168,18 @@ var Flow = Class.create({
     },
      
     scrollToIndex: function(index, centerIt) {
-        var position = index * this.biggestElement.size.x;
-        if (!this.options.centerFocus) position -= this.size.x;
-        this.setPosition(position);  
+        this.scrollToElement(this.elements[index]);
     },
     
     scrollToElement: function(flowElement) {
         flowElement = this.findFlowElement(flowElement);
         this.setPosition(flowElement.center.x - this.size.x / 2 - this.offset);
+        
+        this.elements.each(function(element) {
+            element.element.classNames().remove(this.options.focusedClass);            
+        }.bind(this));
+        
+        flowElement.element.classNames().add(this.options.focusedClass);
     },
     
     autoScroll: function() {
@@ -530,10 +534,16 @@ Flow.Element = Class.create({
             position: "absolute"
         });
         
+        this.getSize();
+    },
+    
+    getSize: function() {
         this.size = { x: this.element.getWidth(), y: this.element.getHeight() };
     },
     
     update: function() {
+        this.getSize();
+        
         var focalPoint = this.parent.focalPoint + (this.parent.size.x / 2);
         var distance = focalPoint - this.center.x ;
 
@@ -551,8 +561,7 @@ Flow.Element = Class.create({
         
         this.element.setStyle({
             left: drawPosition.x + "px",
-            top: drawPosition.y + "px"//,
-            //zIndex: 30000 - parseInt(Math.abs(this.drawDistance))
+            top: drawPosition.y + "px"
         });
     },
     
@@ -570,6 +579,7 @@ Flow.Element = Class.create({
 });
 
 Flow.DefaultOptions = {
+    focusedClass: "focused",
     containerClass: "container",
     scrollBarClass: "scroll-bar",
     scrollWidgetClass: "scroll-widget",
