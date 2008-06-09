@@ -1,82 +1,20 @@
-// precheck if IE
-var isIE = (/MSIE (5\.5|6\.)/.test(navigator.userAgent) && navigator.platform == "Win32");
-
-Element.addMethods({ 
-    iePNGFix: function(element, blankPixel) {
-        if (!isIE) return;
-        
-        if (element.complete != null) {
-            if (element.src == blankPixel) return;        
-            if (!["png"].include(element.src.toLowerCase().split('.').last())) return;
-            
-            // wait till image is preloaded
-            if (!element.complete) {
-                setTimeout(function(_element, _blankPixel) {
-                    _element.iePNGFix(_blankPixel);
-                }.bind(this, element, blankPixel), 100);
-
-                return;
-            }
-
-            element.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + element.src + "',sizingMethod='scale')";
-            element.style.width = element.width + "px";
-            element.style.height = element.height + "px";
-            element.src = blankPixel || "/images/blank.gif";
-        } else {
-            var src = $(element).getStyle("backgroundImage");
-            var startIndex = src.indexOf("(\"") + 2;
-            var length = src.indexOf("\")");
-            src = src.substring(startIndex, length);
-            
-            if (!["png"].include(src.toLowerCase().split('.').last())) return;
-
-            element.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + src + "',sizingMethod='scale')";
-            element.setStyle({ backgroundImage: "none" });
-        }
-    }
-});
-
-
 var Flow = Class.create({
     initialize: function(wrapper, selector, options) {
         this.wrapper = $(wrapper);
         this.options = Object.extend(Object.extend({}, Flow.DefaultOptions), options || {});
         
         this.offset = this.options.maxScrollVelocity;
-        
         this.container = this.wrapper.getElementsBySelector("." + this.options.containerClass).first();
-        
-        if (this.previousButton) this.leftButton.observe("click", this.previousPage.bind(this));
-        if (this.nextButton) this.leftButton.observe("click", this.nextPage.bind(this));
         
         this.getPosition();
         
-        this.setup();
-        this.setupElements(this.container.getElementsBySelector(selector));
-        if (this.options.useScrollBar) this.setupScrollBar();
+        this.setupContainer();
+        this.setupElements($$(selector));
         this.setupPageButtons();
-        
-        if (this.options.centerAtStart)
-            this.target = this.focalPoint = this.actualSize.x / 2;
-        else
-            this.target = this.focalPoint = 0;
-        
-        this.setPosition(this.target);
-        
-        if (this.options.useScrollBar) {
-            this.scrollBar.setPosition(this.target);
-            this.target = this.scrollBar.actualPosition();
-        }
-        
-        new PeriodicalExecuter(this.update.bind(this), 0.01);
-        
-        this.startAutoScroll();
-    },
-    
-    startAutoScroll: function() {
-        this.autoScroller = new PeriodicalExecuter(this.autoScroll.bind(this), this.options.autoScrollDelay);
-        this.autoScrollAmount = this.biggestElement.size.x;
-        if (!this.options.autoScroll) this.autoScroller.stop();  
+        this.setupScrollBar();
+        this.setupStartingPosition();
+        this.setupUpdater();        
+        this.setupAutoScroll();
     },
     
     getPosition: function() {
@@ -84,7 +22,7 @@ var Flow = Class.create({
         this.position = { x: temp[0], y: temp[1] };  
     },
     
-    setup: function() {        
+    setupContainer: function() {        
         this.container.setStyle({
             position: "relative",
             overflow: "hidden"
@@ -102,6 +40,146 @@ var Flow = Class.create({
         this.container.observe("mouseover", this.mouseEnter.bind(this)(this.containerEnter.bindAsEventListener(this)));
         this.container.observe("mouseout", this.mouseEnter.bind(this)(this.containerLeave.bindAsEventListener(this)));
     },
+    
+    setupStartingPosition: function() {
+        this.target = 0;
+        if (this.options.centerAtStart) this.target = this.actualSize.x / 2;
+        
+        this.setPosition(this.target);
+        this.focalPoint = this.target;
+    },
+    
+    setupAutoScroll: function() {
+        this.autoScroller = new PeriodicalExecuter(this.autoScroll.bind(this), this.options.autoScrollDelay);
+        this.autoScrollAmount = this.biggestElement.size.x;
+        
+        if (!this.options.autoScroll) this.autoScroller.stop();
+    },    
+    
+    setupUpdater: function() {
+        this.updater = new PeriodicalExecuter(this.update.bind(this), 0.01);  
+    },
+    
+    setupElements: function(elements) {
+        if (this.options.centerFocus) {
+            this.excess = { left: this.size.x / 2, right: this.size.x / 2 };
+        } else {
+            var size = elements.first().getWidth() / 2;
+            this.excess = { left: size, right: this.size.x - size };
+        }
+        
+        this.holder = new Element("div");
+        this.holder.setStyle({
+            position: "relative",
+            height: this.size.y + "px"
+        });
+        
+        this.elements = [];
+        
+        var previous;
+        
+        elements.each(function(element) {
+            var flowElement = new Flow.Element(element)
+            
+            flowElement.parent = this;
+            flowElement.previous = previous;
+            if (previous) previous.next = flowElement;
+            
+            flowElement.setCenter();
+            flowElement.update();
+            
+            element.observe("click", function(event) {
+                this.options.onFocus(flowElement);
+                if (this.options.focusOnClick) this.scrollToElement(flowElement);                
+                event.stop();
+            }.bind(this));
+            
+            this.elements.push(flowElement);
+            this.holder.appendChild(element);
+            
+            previous = flowElement;
+            
+            if (this.biggestElement == null || flowElement.size.x > this.biggestElement.size.x) {
+                this.biggestElement = flowElement;
+            }
+        }.bind(this));
+        
+        var offset = this.offset;
+        if (this.options.centerFocus) offset += this.size.x / 2;
+        
+        var lastElement = this.elements.last();
+        this.holder.setStyle({
+            width: (lastElement.center.x + lastElement.size.x / 2 + offset) + "px"
+        });
+        
+        this.container.appendChild(this.holder);
+        this.actualSize = { x: (this.elements.last().center.x - this.excess.right - this.offset), y: this.container.getHeight() };
+    },
+    
+    setupScrollBar: function() {
+        if (!this.options.useScrollBar) return;
+
+        var scrollBar = this.wrapper.getElementsBySelector("." + this.options.scrollBarClass).first();
+        
+        if (scrollBar) {
+            this.scrollBar = new Flow.ScrollBar(scrollBar, this.options, this);
+        } else {            
+            this.options.useScrollBar = false;
+        }        
+    },
+    
+    setupPageButtons: function() {
+        this.previousPageButton = this.wrapper.getElementsBySelector("." + this.options.previousPageClass).first();
+        this.nextPageButton = this.wrapper.getElementsBySelector("." + this.options.nextPageClass).first();
+        
+        if (this.previousPageButton) {
+            this.previousPageButton.iePNGFix();
+            this.previousPageButton.observe("click", this.previousPage.bind(this));
+            this.previousPageButton.observe("mouseover", this.previousPageButton.iePNGFix.bind(this.previousPageButton));
+        }
+        
+        if (this.nextPageButton) {
+            this.nextPageButton.iePNGFix();
+            this.nextPageButton.observe("click", this.nextPage.bind(this));
+            this.nextPageButton.observe("mouseover", this.nextPageButton.iePNGFix.bind(this.nextPageButton));
+        }
+    },
+     
+    scrollToIndex: function(index) {
+        this.setPosition(index * this.biggestElement.size.x);  
+    },
+    
+    scrollToElement: function(flowElement) {
+        flowElement = this.findFlowElement(flowElement);
+        this.setPosition(flowElement.center.x - this.size.x / 2 - this.offset);
+    },
+    
+    autoScroll: function() {
+        this.setPosition(this.target + this.autoScrollAmount);
+        if (this.target == 0  || this.target == this.actualSize.x) {
+            switch (this.options.autoScrollFinishAction) {
+                case "rewind":
+                    this.target = 0;
+                    break;
+                case "reverse":
+                    this.autoScrollAmount = -this.autoScrollAmount;
+                    break;
+            }
+        }
+    },
+    
+    setPosition: function(target, snap) {
+        this.velocity = null;
+        this.target = target;
+        this.clampTarget();
+        
+        if (snap == null) snap = this.options.scrollSnap;
+        
+        if (this.options.useScrollBar) {
+            if (snap) this.target = this.scrollBar.snap(this.target);
+            this.scrollBar.setPosition(this.target);
+        }
+    },    
     
     mouseWheel: function (event) {
         var delta = 0;
@@ -158,14 +236,6 @@ var Flow = Class.create({
         }
     },
     
-    toggleScrollBar: function(show) {
-        if (!this.options.useScrollBar) return;
-        
-        if (this.scrollBarEffect) this.scrollBarEffect.cancel();
-        var effect = show ? Effect.Appear : Effect.Fade;
-        this.scrollBarEffect = new effect(this.scrollBar.scrollBar, { duration: 0.25 });   
-    },
-    
     containerEnter: function(event) {
         if (this.options.autoHideScrollBar) this.toggleScrollBar(true);
     },
@@ -185,15 +255,23 @@ var Flow = Class.create({
         if (this.options.autoHideScrollBar) this.toggleScrollBar(false);
     },
     
+    toggleScrollBar: function(show) {
+        if (!this.options.useScrollBar) return;
+        
+        if (this.scrollBarEffect) this.scrollBarEffect.cancel();
+        var effect = show ? Effect.Appear : Effect.Fade;
+        this.scrollBarEffect = new effect(this.scrollBar.scrollBar, { duration: 0.25 });   
+    },
+    
     update: function() {        
         this.getPosition();
         
         this.focalPoint += (this.target - this.focalPoint) / this.options.scrollCatchUp;
         this.container.scrollLeft = this.focalPoint + this.offset;
         
-        if (this.options.autoScroll && Math.abs(this.target - this.focalPoint) > 0.01) {
+        if (this.options.autoScroll && this.isScrolling()) {
             clearTimeout(this.autoScrollRestarter);
-            this.autoScrollRestarter = setTimeout(this.startAutoScroll.bind(this), 2000);
+            this.autoScrollRestarter = setTimeout(this.setupAutoScroll.bind(this), 2000);
         }
         
         if (this.mouseScrollAmount != 0 && (!this.scrollBar || this.scrollBar.velocity == null)) {
@@ -207,82 +285,18 @@ var Flow = Class.create({
         });
     },
     
-    setupElements: function(elements) {
-        if (this.options.centerFocus) {
-            this.excess = { left: this.size.x / 2, right: this.size.x / 2 };
-        } else {
-            var size = elements.first().getWidth() / 2;
-            this.excess = { left: size, right: this.size.x - size };
-        }
-        
-        this.holder = new Element("div");
-        this.holder.setStyle({
-            position: "relative",
-            height: this.size.y + "px"
-        });
-        
-        this.elements = [];
-        
-        var previous;
-        
-        elements.each(function(element) {
-            var flowElement = new Flow.Element(element)
-            
-            flowElement.parent = this;
-            flowElement.previous = previous;
-            if (previous) previous.next = flowElement;
-            
-            flowElement.setCenter();
-            flowElement.update();
-            
-            this.elements.push(flowElement);
-            this.holder.appendChild(element);
-            
-            previous = flowElement;
-            
-            if (this.biggestElement == null || flowElement.size.x > this.biggestElement.size.x) {
-                this.biggestElement = flowElement;
-            }
-        }.bind(this));
-        
-        var offset = this.offset;
-        if (this.options.centerFocus) offset += this.size.x / 2;
-        
-        var lastElement = this.elements.last();
-        this.holder.setStyle({
-            width: (lastElement.center.x + lastElement.size.x / 2 + offset) + "px"
-        });
-        
-        this.container.appendChild(this.holder);
-        this.actualSize = { x: (this.elements.last().center.x - this.excess.right - this.offset), y: this.container.getHeight() };
+    isScrolling: function() {
+        return Math.abs(this.target - this.focalPoint) > 0.01;
     },
     
-    setupScrollBar: function() {
-        var scrollBar = this.wrapper.getElementsBySelector("." + this.options.scrollBarClass).first();
+    findFlowElement: function(element) {
+        var elementFound;
         
-        if (scrollBar) {
-            this.scrollBar = new Flow.ScrollBar(scrollBar, this.options);
-            this.scrollBar.parent = this;
-            this.scrollBar.setup();
-            
-            scrollBar.observe("mousewheel", this.mouseWheel.bind(this));
-        } else {            
-            this.options.useScrollBar = false;
-        }
-    },
-    
-    autoScroll: function() {
-        this.setPosition(this.target + this.autoScrollAmount);
-        if (this.target == 0  || this.target == this.actualSize.x) {
-            switch (this.options.autoScrollFinishAction) {
-                case "rewind":
-                    this.target = 0;
-                    break;
-                case "reverse":
-                    this.autoScrollAmount = -this.autoScrollAmount;
-                    break;
-            }
-        }
+        this.elements.each(function(flowElement) {
+            if (flowElement.element == element || flowElement == element) elementFound = flowElement;
+        });
+        
+        return elementFound;
     },
     
     clampTarget: function() {
@@ -302,8 +316,7 @@ var Flow = Class.create({
                 this.nextPageButton.classNames().add(this.options.pagingDisabledClass);
             }
             
-            this.target = this.actualSize.x;     
-            //if (this.autoScroller) this.autoScroller.stop();
+            this.target = this.actualSize.x;
         } else {
             if (this.nextPageButton) {
                 this.nextPageButton.classNames().remove(this.options.pagingDisabledClass);
@@ -321,44 +334,13 @@ var Flow = Class.create({
     
     nextPage: function() {
         this.setPosition(this.target + this.size.x);
-    },
-    
-    setPosition: function(target, snap) {
-        this.velocity = null;
-        this.target = target;
-        this.clampTarget();
-        
-        if (snap == null) snap = this.options.scrollSnap;
-        
-        if (this.options.useScrollBar) {
-            if (snap) this.target = this.scrollBar.snap(this.target);
-            this.scrollBar.setPosition(this.target);
-        }
-    },
-    
-    setupPageButtons: function() {
-        this.previousPageButton = this.wrapper.getElementsBySelector("." + this.options.previousPageClass).first();
-        this.nextPageButton = this.wrapper.getElementsBySelector("." + this.options.nextPageClass).first();
-        
-        if (this.previousPageButton) {
-            this.previousPageButton.iePNGFix();
-            this.previousPageButton.observe("click", this.previousPage.bind(this));
-            this.previousPageButton.observe("mouseover", this.previousPageButton.iePNGFix.bind(this.previousPageButton));
-        }
-        
-        if (this.nextPageButton) {
-            this.nextPageButton.iePNGFix();
-            this.nextPageButton.observe("click", this.nextPage.bind(this));
-            this.nextPageButton.observe("mouseover", this.nextPageButton.iePNGFix.bind(this.nextPageButton));
-        }
     }
 });
 
 Flow.ScrollBar = Class.create({
-    initialize: function(scrollBar, options) {
+    initialize: function(scrollBar, options, parent) {
         this.scrollBar = $(scrollBar);
-        //this.scrollBar.iePNGFix();
-        // bug: for some reason applying the fix to the scrollbar, breaks the scroll widgets events
+        this.parent = parent;
         
         this.options = options;
         
@@ -376,6 +358,9 @@ Flow.ScrollBar = Class.create({
         var temp = this.scrollBar.cumulativeOffset();
         this.position = { x: temp[0], y: temp[1] };
         this.scrollPosition = 0;
+        
+        this.setup();
+        this.scrollBar.observe("mousewheel", this.parent.mouseWheel.bind(this.parent));
     },
     
     setPosition: function(position) {
@@ -429,6 +414,9 @@ Flow.ScrollBar = Class.create({
         
         this.scrollWidget.observe("mousedown", this.startDrag.bindAsEventListener(this));
         $(document).observe("mouseup", this.stopDrag.bindAsEventListener(this));
+        
+        this.setPosition(this.parent.target);
+        this.parent.target = this.actualPosition();
     },
     
     clampedScrollPosition: function() {
@@ -541,27 +529,13 @@ Flow.DefaultOptions = {
     scrollBarFriction: 0.9,
     maxScrollVelocity: 150,
     centerFocus: false,
+    focusOnClick: true,
     autoScroll: true,
     autoScrollDelay: 2,
     autoHideScrollBar: true,
     centerAtStart: false,
     mouseScrollSensitivity: 0.04,
     mouseScrollDeadZoneSize: 500,
-    autoScrollFinishAction: "rewind"
+    autoScrollFinishAction: "rewind",
+    onFocus: function() {}
 };
-
-/*
-Has mac bounce when reaches ends
-Has inertia (customised with friction and max velocity)
-Has snapping so elements aren't clipped (while scrolling like coverflow)
-Can make focal pointer at center
-Has scroll bar (scroll bar can be styled and code uses the style to configure scroll bar) (fully functional)
- - click anywhere on scroll bar
- - move scroll widget
- - all moves organically
- - can throw scroll widget
-Has auto scroll at start
-Has organic slow down
-Has next/prev page
-Has snap on mouse up function
-*/

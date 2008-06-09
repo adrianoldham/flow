@@ -7,8 +7,11 @@
     <title>index</title>
     <script type="text/javascript" charset="utf-8" src="../lib/prototype.js"></script>
     <script type="text/javascript" charset="utf-8" src="../lib/scriptaculous.js?load=effects"></script>
-    <script type="text/javascript" charset="utf-8" src="../js/transitions.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../js/helper.js"></script>
     <script type="text/javascript" charset="utf-8" src="../js/flow.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../js/cycler.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../js/panorama.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../js/flowing_panorama.js"></script>
     
     <style type="text/css" media="screen">
         body {
@@ -17,19 +20,23 @@
         }
         
         .container {
-            width: 1200px;
+            width: 1000px;
             height: 300px;
             overflow: hidden;
             background: transparent url(images/bg.gif);
         }
         
-        img {
+        #flow img {
             padding: 0 20px;
+        }
+        
+        a img {
+            border: none;
         }
         
         .scroll-bar {
             position: absolute;
-            left: 128px;
+            left: 30px;
             width: 944px;
             height: 19px;
             bottom: 19px;
@@ -45,7 +52,7 @@
         
         #flow {
             position: relative;
-            width: 1200px;
+            width: 1000px;
             height: 300px;
             margin: auto;
         }
@@ -73,52 +80,39 @@
             background: transparent url(images/right.png) no-repeat;
             cursor: pointer;     
         }
+        
+        #panorama {
+            width: 403px;
+            height: 234px;
+            overflow: hidden;
+            margin: auto;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
-    
+    <div id="test" style="color:white"></div>
+    <div id="panorama">
+    </div>
     <div id="flow">
         <div class="container">
-            <img src="images/cover1.jpg"/>
-            <img src="images/cover2.jpg"/>
-            <img src="images/cover3.jpg"/>
-            <img src="images/cover4.jpg"/>    
-            <img src="images/cover5.jpg"/>  
-            <img src="images/cover1.jpg"/>
-            <img src="images/cover2.jpg"/>
-            <img src="images/cover3.jpg"/>
-            <img src="images/cover4.jpg"/>    
-            <img src="images/cover5.jpg"/>
-            <img src="images/cover1.jpg"/>
-            <img src="images/cover2.jpg"/>
-            <img src="images/cover3.jpg"/>
-            <img src="images/cover4.jpg"/>    
-            <img src="images/cover5.jpg"/>
-            <img src="images/cover1.jpg"/>
-            <img src="images/cover2.jpg"/>
-            <img src="images/cover3.jpg"/>
-            <img src="images/cover4.jpg"/>    
-            <img src="images/cover5.jpg"/>     
-            <img src="images/cover1.jpg"/>
-            <img src="images/cover2.jpg"/>
-            <img src="images/cover3.jpg"/>
-            <img src="images/cover4.jpg"/>    
-            <img src="images/cover5.jpg"/>  
-            <img src="images/cover1.jpg"/>
-            <img src="images/cover2.jpg"/>
-            <img src="images/cover3.jpg"/>
-            <img src="images/cover4.jpg"/>    
-            <img src="images/cover5.jpg"/>
-            <img src="images/cover1.jpg"/>
-            <img src="images/cover2.jpg"/>
-            <img src="images/cover3.jpg"/>
-            <img src="images/cover4.jpg"/>    
-            <img src="images/cover5.jpg"/>
-            <img src="images/cover1.jpg"/>
-            <img src="images/cover2.jpg"/>
-            <img src="images/cover3.jpg"/>
-            <img src="images/cover4.jpg"/>    
-            <img src="images/cover5.jpg"/>
+            <a href="images/pano1.jpg"><img src="images/thumb1.jpg"/></a>
+            <a href="images/pano2.jpg"><img src="images/thumb2.jpg"/></a>
+            <a href="images/pano1.jpg"><img src="images/thumb1.jpg"/></a>
+            <a href="images/pano2.jpg"><img src="images/thumb2.jpg"/></a>
+            <a href="images/pano1.jpg"><img src="images/thumb1.jpg"/></a>
+            <a href="images/pano2.jpg"><img src="images/thumb2.jpg"/></a>
+            <a href="images/pano1.jpg"><img src="images/thumb1.jpg"/></a>
+            <a href="images/pano2.jpg"><img src="images/thumb2.jpg"/></a>
+            <a href="images/pano1.jpg"><img src="images/thumb1.jpg"/></a>
+            <a href="images/pano2.jpg"><img src="images/thumb2.jpg"/></a>
+            <a href="images/pano1.jpg"><img src="images/thumb1.jpg"/></a>
+            <a href="images/pano1.jpg"><img src="images/thumb1.jpg"/></a>
+            <a href="images/pano2.jpg"><img src="images/thumb2.jpg"/></a>
+            <a href="images/pano1.jpg"><img src="images/thumb1.jpg"/></a>
+            <a href="images/pano2.jpg"><img src="images/thumb2.jpg"/></a>
+            <a href="images/pano1.jpg"><img src="images/thumb1.jpg"/></a>
+            <a href="images/pano2.jpg"><img src="images/thumb2.jpg"/></a>            
         </div>
         <div class="scroll-bar" style="display: none">
             <div class="scroll-widget"></div>
@@ -129,10 +123,10 @@
     </div>
     
     <script type="text/javascript" charset="utf-8">
-        var flow;
         function runTest() {
-            flow = new Flow("flow", "img");
+            var flowingPanorama = new FlowingPanorama("flow", "panorama", "#flow a");
         }
+        
         Event.observe(window, "load", runTest);
     </script>
 </body>
