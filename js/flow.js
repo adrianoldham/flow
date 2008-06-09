@@ -40,7 +40,7 @@ var Flow = Class.create({
         this.container.observe("mouseover", this.mouseEnter.bind(this)(this.containerEnter.bindAsEventListener(this)));
         this.container.observe("mouseout", this.mouseEnter.bind(this)(this.containerLeave.bindAsEventListener(this)));
         
-        document.observe("keypress", this.keyScroll.bindAsEventListener(this));
+        document.observe("keydown", this.keyScroll.bindAsEventListener(this));
     },
     
     setupStartingPosition: function() {
