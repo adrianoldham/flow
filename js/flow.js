@@ -39,6 +39,8 @@ var Flow = Class.create({
         this.container.observe("mousemove", this.mouseScroll.bind(this));
         this.container.observe("mouseover", this.mouseEnter.bind(this)(this.containerEnter.bindAsEventListener(this)));
         this.container.observe("mouseout", this.mouseEnter.bind(this)(this.containerLeave.bindAsEventListener(this)));
+        
+        document.observe("keypress", this.keyScroll.bindAsEventListener(this));
     },
     
     setupStartingPosition: function() {
@@ -201,7 +203,30 @@ var Flow = Class.create({
             if (snap) this.target = this.scrollBar.snap(this.target);
             this.scrollBar.setPosition(this.target);
         }
-    },    
+    }, 
+    
+    keyScroll: function(event) {
+        var leftFunction, rightFunction;
+        switch (this.options.keyScrollType){
+            case "per-page":
+                leftFunction = this.previousPage.bind(this);
+                rightFunction = this.nextPage.bind(this);
+                break;
+            case "per-item":
+                leftFunction = this.previousItem.bind(this);
+                rightFunction = this.nextItem.bind(this);                
+                break;
+        }
+        
+        switch (event.keyCode) {
+            case 37:
+                leftFunction();
+                break;
+            case 39:
+                rightFunction();
+                break;
+        }
+    },
     
     mouseWheel: function (event) {
         var delta = 0;
@@ -568,6 +593,7 @@ Flow.DefaultOptions = {
     mouseScrollDeadZoneSize: 500,
     autoScrollFinishAction: "rewind", // reverse or rewind
     autoScrollType: "per-page", // per-page or per-item
-    pagingType: "per-item", // per-page or per-item
+    pagingType: "per-item",     // per-page or per-item
+    keyScrollType: "per-item",  // per-page or per-item
     onFocus: function() {}
 };
