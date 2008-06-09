@@ -51,7 +51,15 @@ var Flow = Class.create({
     
     setupAutoScroll: function() {
         this.autoScroller = new PeriodicalExecuter(this.autoScroll.bind(this), this.options.autoScrollDelay);
-        this.autoScrollAmount = this.biggestElement.size.x;
+        
+        switch (this.options.autoScrollType) {
+            case "per-page":
+                this.autoScrollAmount = this.size.x;
+                break;
+            case "per-item":
+                this.autoScrollAmount = this.biggestElement.size.x;
+                break;
+        }
         
         if (!this.options.autoScroll) this.autoScroller.stop();
     },    
@@ -132,15 +140,27 @@ var Flow = Class.create({
         this.previousPageButton = this.wrapper.getElementsBySelector("." + this.options.previousPageClass).first();
         this.nextPageButton = this.wrapper.getElementsBySelector("." + this.options.nextPageClass).first();
         
+        var previousFunction, nextFunction;
+        switch (this.options.pagingType){
+            case "per-page":
+                previousFunction = this.previousPage.bind(this);
+                nextFunction = this.nextPage.bind(this);
+                break;
+            case "per-item":
+                previousFunction = this.previousItem.bind(this);
+                nextFunction = this.nextItem.bind(this);                
+                break;
+        }
+        
         if (this.previousPageButton) {
             this.previousPageButton.iePNGFix();
-            this.previousPageButton.observe("click", this.previousPage.bind(this));
+            this.previousPageButton.observe("click", previousFunction);
             this.previousPageButton.observe("mouseover", this.previousPageButton.iePNGFix.bind(this.previousPageButton));
         }
         
         if (this.nextPageButton) {
             this.nextPageButton.iePNGFix();
-            this.nextPageButton.observe("click", this.nextPage.bind(this));
+            this.nextPageButton.observe("click", nextFunction);
             this.nextPageButton.observe("mouseover", this.nextPageButton.iePNGFix.bind(this.nextPageButton));
         }
     },
@@ -158,7 +178,7 @@ var Flow = Class.create({
     
     autoScroll: function() {
         this.setPosition(this.target + this.autoScrollAmount);
-        if (this.target == 0  || this.target == this.actualSize.x) {
+        if (this.target == 0 || this.target == this.actualSize.x) {
             switch (this.options.autoScrollFinishAction) {
                 case "rewind":
                     this.target = 0;
@@ -336,6 +356,14 @@ var Flow = Class.create({
     
     nextPage: function() {
         this.setPosition(this.target + this.size.x);
+    },
+    
+    previousItem: function() {
+        this.setPosition(this.target - this.biggestElement.size.x);
+    },
+    
+    nextItem: function() {
+        this.setPosition(this.target + this.biggestElement.size.x);
     }
 });
 
@@ -538,6 +566,8 @@ Flow.DefaultOptions = {
     centerAtStart: false,
     mouseScrollSensitivity: 0.04,
     mouseScrollDeadZoneSize: 500,
-    autoScrollFinishAction: "rewind",
+    autoScrollFinishAction: "rewind", // reverse or rewind
+    autoScrollType: "per-page", // per-page or per-item
+    pagingType: "per-item", // per-page or per-item
     onFocus: function() {}
 };
