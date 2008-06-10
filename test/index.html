@@ -128,7 +128,9 @@
     
     <script type="text/javascript" charset="utf-8">
         function runTest() {
-            var flowingPanorama = new FlowingPanorama("flow", "panorama", "#flow a");
+            var flowingPanorama = new FlowingPanorama("flow", "panorama", "#flow a", {
+                verticalAlignment: "middle"
+            });
         }
         
         Event.observe(window, "load", runTest);

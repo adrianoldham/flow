@@ -88,6 +88,8 @@ var Flow = Class.create({
         
         var previous;
         
+        this.focalPoint = 0;
+        
         elements.each(function(element) {
             var flowElement = new Flow.Element(element)
             
@@ -98,14 +100,16 @@ var Flow = Class.create({
             flowElement.setCenter();
             flowElement.update();
             
-            element.observe("click", function(event) {
-                this.options.onFocus(flowElement);
-                if (this.options.focusOnClick) this.scrollToElement(flowElement);                
-                event.stop();
-            }.bind(this));
+            if (this.options.focusOnClick) {
+                element.observe("click", function(event) {
+                    this.options.onFocus(flowElement);
+                    this.scrollToElement(flowElement);                
+                    event.stop();
+                }.bind(this));
+            }
             
             this.elements.push(flowElement);
-            this.holder.appendChild(element);
+            //this.holder.appendChild(element);
             
             previous = flowElement;
             
@@ -122,7 +126,7 @@ var Flow = Class.create({
             width: (lastElement.center.x + lastElement.size.x / 2 + offset) + "px"
         });
         
-        this.container.appendChild(this.holder);
+//        this.container.insertBefore(this.holder, this.container.childElements().first());
         this.actualSize = { x: (this.elements.last().center.x - this.excess.right - this.offset), y: this.container.getHeight() };
     },
     
@@ -185,11 +189,12 @@ var Flow = Class.create({
     },
     
     autoScroll: function() {
-        this.setPosition(this.target + this.autoScrollAmount);
+        this.setPosition(this.target + this.autoScrollAmount);        
         if (this.target == 0 || this.target == this.actualSize.x) {
             switch (this.options.autoScrollFinishAction) {
                 case "rewind":
                     this.target = 0;
+                    this.setPosition(this.target);
                     break;
                 case "reverse":
                     this.autoScrollAmount = -this.autoScrollAmount;
@@ -227,9 +232,11 @@ var Flow = Class.create({
         switch (event.keyCode) {
             case 37:
                 leftFunction();
+                if (this.autoScroller) this.autoScroller.stop();
                 break;
             case 39:
                 rightFunction();
+                if (this.autoScroller) this.autoScroller.stop();
                 break;
         }
     },
@@ -536,6 +543,9 @@ Flow.Element = Class.create({
             position: "absolute"
         });
         
+        this.original = {};
+        this.original.size = { x: this.element.getWidth(), y: this.element.getHeight() };
+        
         this.getSize();
     },
     
@@ -546,41 +556,76 @@ Flow.Element = Class.create({
     update: function() {
         this.getSize();
         
-        var focalPoint = this.parent.focalPoint + (this.parent.size.x / 2);
-        var distance = focalPoint - this.center.x ;
+        var focalPoint = this.parent.focalPoint + (this.parent.size.x / 2) + this.parent.offset;
+        var distance = focalPoint - this.center.x;
 
-        var temp = (Math.abs(distance) / this.size.x) + 1;
-        temp *= 0.5;
+        var maxTemp = 2;
+        var maxDistance = (2 * maxTemp * this.size.x) - this.size.x;
+        maxDistance *= (distance / Math.abs(distance));
         
-        if (temp == 0) temp = 1;
-        temp = 1;
+        /*var scale;
+        if (Math.abs(distance) > Math.abs(maxDistance)) {
+            this.drawDistance = distance - maxDistance;
+            this.drawDistance /= 2;
+            this.drawDistance += maxDistance;
+            
+            this.drawDistance = this.drawDistance / maxTemp;
+            
+            scale = 1;
+        } else {
+            var temp = ((Math.abs(distance) / this.size.x) + 1) / 2;
+            if (temp == 0) temp = 1;
+            
+            this.drawDistance = distance / temp;
+            
+            scale = 1.5 - (distance / maxDistance) / 2;
+        }
+        scale/=2*/
+        this.drawDistance=distance;
         
-        this.drawDistance = distance / temp;
         var drawPosition = { x: focalPoint - this.drawDistance, y: this.center.y };
+        
+        scale = (this.original.size.x / Math.abs(this.drawDistance)) / 1;
+        if (scale > 1) scale = 1;
+        scale=1;
         
         drawPosition.x -= this.size.x / 2;
         drawPosition.y -= this.size.y / 2;
         
         this.element.setStyle({
             left: drawPosition.x + "px",
-            top: drawPosition.y + "px"
+            top: drawPosition.y + "px"/*,
+            width: Math.ceil(this.original.size.x * scale) + "px",
+            height: Math.ceil(this.original.size.y * scale) + "px"*/
         });
     },
     
-    setCenter: function() {            
+    setCenter: function() {  
+        var y;
+        
+        switch (this.parent.options.verticalAlignment) {
+            case "bottom": 
+                y = this.parent.size.y - this.size.y + (this.size.y / 2);
+                break;
+            case "middle":
+                y = this.parent.size.y / 2;
+                break;
+        }
+        
         if (!this.previous) {
-            this.center = { x: this.parent.excess.left + this.parent.offset, y: this.parent.size.y / 2 };
+            this.center = { x: this.parent.excess.left + this.parent.offset, y: y };
             return;
         }
         
         this.center = {
             x: this.previous.center.x + this.previous.size.x / 2 + this.size.x / 2,
-            y: this.previous.center.y
+            y: y
         };
     }
 });
 
 Flow.DefaultOptions = {
+    verticalAlignment: "bottom",
     focusedClass: "focused",
     containerClass: "container",
     scrollBarClass: "scroll-bar",
@@ -604,7 +649,7 @@ Flow.DefaultOptions = {
     mouseScrollSensitivity: 0.04,
     mouseScrollDeadZoneSize: 500,
     autoScrollFinishAction: "rewind", // reverse or rewind
-    autoScrollType: "per-page", // per-page or per-item
+    autoScrollType: "per-item", // per-page or per-item
     pagingType: "per-item",     // per-page or per-item
     keyScrollType: "per-item",  // per-page or per-item
     onFocus: function() {}
