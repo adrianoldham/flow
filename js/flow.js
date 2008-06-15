@@ -140,6 +140,8 @@ var Flow = Class.create({
         var scrollBar = this.wrapper.getElementsBySelector("." + this.options.scrollBarClass).first();
         
         if (scrollBar) {
+            scrollBar.style.zIndex = this.options.zIndex.last() + 1;
+            
             this.scrollBar = new Flow.ScrollBar(scrollBar, this.options, this);
         } else {            
             this.options.useScrollBar = false;
@@ -163,12 +165,16 @@ var Flow = Class.create({
         }
         
         if (this.previousPageButton) {
+            this.previousPageButton.style.zIndex = this.options.zIndex.last() + 1;
+            
             this.previousPageButton.iePNGFix();
             this.previousPageButton.observe("click", previousFunction);
             this.previousPageButton.observe("mouseover", this.previousPageButton.iePNGFix.bind(this.previousPageButton));
         }
         
         if (this.nextPageButton) {
+            this.nextPageButton.style.zIndex = this.options.zIndex.last() + 1;
+            
             this.nextPageButton.iePNGFix();
             this.nextPageButton.observe("click", nextFunction);
             this.nextPageButton.observe("mouseover", this.nextPageButton.iePNGFix.bind(this.nextPageButton));
