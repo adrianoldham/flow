@@ -565,8 +565,9 @@ Flow.Element = Class.create({
         var distance = this.parent.options.stacker(this, focalPoint - this.original.center.x);
         var scale = this.parent.options.scaler(this, distance);
         
+        var zIndexRange = this.parent.options.zIndex.last() - this.parent.options.zIndex.first();
         this.element.setStyle({
-            zIndex: 30000 - parseInt(Math.abs(distance)),
+            zIndex: parseInt((1 - Math.abs(distance) / (this.parent.size.x / 2)) * zIndexRange) + this.parent.options.zIndex.first(),
             width: Math.ceil(this.original.size.x * scale) + "px",
             height: Math.ceil(this.original.size.y * scale) + "px"
         });
@@ -662,6 +663,7 @@ Flow.Scalers = {
 };
 
 Flow.DefaultOptions = {
+    zIndex: [100, 500],                     // range of the zIndex value for the images (the bigger the range, the more accurate the layering)
     stacker: Flow.Stackers.normal,
     scaler: Flow.Scalers.normal,
     verticalAlignment: "bottom",
