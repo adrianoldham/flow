@@ -3,6 +3,9 @@ var Flow = Class.create({
         this.wrapper = $(wrapper);
         this.options = Object.extend(Object.extend({}, Flow.DefaultOptions), options || {});
         
+        // override the selector if found in options
+        if (this.options.overrideSelector) selector = this.options.overrideSelector;
+        
         this.offset = this.options.maxScrollVelocity;
         this.container = this.wrapper.getElementsBySelector("." + this.options.containerClass).first();
         
@@ -59,7 +62,7 @@ var Flow = Class.create({
                 this.autoScrollAmount = this.size.x;
                 break;
             case "per-item":
-                this.autoScrollAmount = this.biggestElement.size.x;
+                this.autoScrollAmount = this.biggestElement.original.size.x;
                 break;
         }
         
@@ -97,8 +100,9 @@ var Flow = Class.create({
             flowElement.previous = previous;
             if (previous) previous.next = flowElement;
             
-            flowElement.setCenter();
-            flowElement.update();
+            flowElement.original.center = flowElement.getCenter();
+            flowElement.center = flowElement.getCenter();
+            //flowElement.update();
             
             if (this.options.focusOnClick) {
                 element.observe("click", function(event) {
@@ -113,7 +117,7 @@ var Flow = Class.create({
             
             previous = flowElement;
             
-            if (this.biggestElement == null || flowElement.size.x > this.biggestElement.size.x) {
+            if (this.biggestElement == null || flowElement.original.size.x > this.biggestElement.original.size.x) {
                 this.biggestElement = flowElement;
             }
         }.bind(this));
@@ -123,11 +127,11 @@ var Flow = Class.create({
         
         var lastElement = this.elements.last();
         this.holder.setStyle({
-            width: (lastElement.center.x + lastElement.size.x / 2 + offset) + "px"
+            width: (lastElement.original.center.x + lastElement.original.size.x / 2 + offset) + "px"
         });
         
-//        this.container.insertBefore(this.holder, this.container.childElements().first());
-        this.actualSize = { x: (this.elements.last().center.x - this.excess.right - this.offset), y: this.container.getHeight() };
+        this.container.insertBefore(this.holder, this.container.childElements().first());
+        this.actualSize = { x: (this.elements.last().original.center.x - this.excess.right - this.offset), y: this.container.getHeight() };
     },
     
     setupScrollBar: function() {
@@ -177,7 +181,7 @@ var Flow = Class.create({
     
     scrollToElement: function(flowElement) {
         flowElement = this.findFlowElement(flowElement);
-        this.setPosition(flowElement.center.x - this.size.x / 2 - this.offset);
+        this.setPosition(flowElement.original.center.x - this.size.x / 2 - this.offset);
         
         this.elements.each(function(element) {
             element.element.classNames().remove(this.options.focusedClass);            
@@ -252,7 +256,7 @@ var Flow = Class.create({
         }
 
         if (delta) {
-            this.setPosition(this.target - (delta * this.biggestElement.size.x));
+            this.setPosition(this.target - (delta * this.biggestElement.original.size.x));
             if (this.autoScroller) this.autoScroller.stop();
         }
 
@@ -397,11 +401,11 @@ var Flow = Class.create({
     },
     
     previousItem: function() {
-        this.setPosition(this.target - this.biggestElement.size.x);
+        this.setPosition(this.target - this.biggestElement.original.size.x);
     },
     
     nextItem: function() {
-        this.setPosition(this.target + this.biggestElement.size.x);
+        this.setPosition(this.target + this.biggestElement.original.size.x);
     }
 });
 
@@ -527,7 +531,7 @@ Flow.ScrollBar = Class.create({
     },
     
     snap: function(position) {
-        return Math.round(position / this.parent.biggestElement.size.x) * this.parent.biggestElement.size.x;
+        return Math.round(position / this.parent.biggestElement.original.size.x) * this.parent.biggestElement.original.size.x;
     }
 });
 
@@ -555,76 +559,111 @@ Flow.Element = Class.create({
     
     update: function() {
         this.getSize();
+        this.center = this.getCenter();
         
         var focalPoint = this.parent.focalPoint + (this.parent.size.x / 2) + this.parent.offset;
-        var distance = focalPoint - this.center.x;
-
-        var maxTemp = 2;
-        var maxDistance = (2 * maxTemp * this.size.x) - this.size.x;
-        maxDistance *= (distance / Math.abs(distance));
+        var distance = this.parent.options.stacker(this, focalPoint - this.original.center.x);
+        var scale = this.parent.options.scaler(this, distance);
         
-        /*var scale;
-        if (Math.abs(distance) > Math.abs(maxDistance)) {
-            this.drawDistance = distance - maxDistance;
-            this.drawDistance /= 2;
-            this.drawDistance += maxDistance;
-            
-            this.drawDistance = this.drawDistance / maxTemp;
-            
-            scale = 1;
-        } else {
-            var temp = ((Math.abs(distance) / this.size.x) + 1) / 2;
-            if (temp == 0) temp = 1;
-            
-            this.drawDistance = distance / temp;
-            
-            scale = 1.5 - (distance / maxDistance) / 2;
-        }
-        scale/=2*/
-        this.drawDistance=distance;
+        this.element.setStyle({
+            zIndex: 30000 - parseInt(Math.abs(distance)),
+            width: Math.ceil(this.original.size.x * scale) + "px",
+            height: Math.ceil(this.original.size.y * scale) + "px"
+        });
         
-        var drawPosition = { x: focalPoint - this.drawDistance, y: this.center.y };
+        this.getSize();
+        this.center = this.getCenter();
         
-        scale = (this.original.size.x / Math.abs(this.drawDistance)) / 1;
-        if (scale > 1) scale = 1;
-        scale=1;
+        var drawPosition = { x: focalPoint - distance, y: this.center.y };
         
         drawPosition.x -= this.size.x / 2;
         drawPosition.y -= this.size.y / 2;
         
         this.element.setStyle({
-            left: drawPosition.x + "px",
-            top: drawPosition.y + "px"/*,
-            width: Math.ceil(this.original.size.x * scale) + "px",
-            height: Math.ceil(this.original.size.y * scale) + "px"*/
+            left: Math.ceil(drawPosition.x) + "px",
+            top: Math.ceil(drawPosition.y) + "px"
         });
     },
     
-    setCenter: function() {  
-        var y;
+    getCenter: function() {
+        var center = {};  
         
         switch (this.parent.options.verticalAlignment) {
+            case "top":
+                center.y = this.size.y / 2;
+                break;
             case "bottom": 
-                y = this.parent.size.y - this.size.y + (this.size.y / 2);
+                center.y = this.parent.size.y - this.size.y + (this.size.y / 2);
                 break;
             case "middle":
-                y = this.parent.size.y / 2;
+                center.y = this.parent.size.y / 2;
                 break;
         }
         
         if (!this.previous) {
-            this.center = { x: this.parent.excess.left + this.parent.offset, y: y };
-            return;
+            center.x = this.parent.excess.left + this.parent.offset;
+        } else {
+            center.x = this.previous.center.x + this.previous.size.x / 2 + this.size.x / 2;   
         }
-        
-        this.center = {
-            x: this.previous.center.x + this.previous.size.x / 2 + this.size.x / 2,
-            y: y
-        };
+
+        return center;
     }
 });
 
+Flow.Stackers = {
+    normal: function(element, distance) {
+        return distance;
+    },
+    
+    grouped: function(element, distance) {
+        var size = element.original.size.x;
+        
+        var temp = ((Math.abs(distance) / size) + 1) / 2;
+        if (temp == 0) temp = 1;
+        
+        return distance / temp;
+    },
+    
+    coverflow: function(element, distance) {
+        var x = distance;
+        
+        var size = element.original.size.x;
+        
+        var newX;
+        
+        var maxTemp = 1;
+        var maxX = ((2 * maxTemp * size) - size) * (x / Math.abs(x));
+        
+        if (Math.abs(x) > Math.abs(maxX)) {
+            newX = (((x - maxX) / 2) + maxX) / maxTemp;
+        } else {
+            var temp = ((Math.abs(x) / size) + 1) / 2;
+            if (temp == 0) temp = 1;
+            
+            newX = x / temp;
+        }
+        
+        return newX;
+    }
+};
+
+Flow.Scalers = {
+    normal: function(element, distance) {
+        return 1;
+    },
+    
+    coverflow: function(element, distance) {
+        var scale = (element.original.size.x / Math.abs(distance)) / 1;
+        scale *= 0.9;
+        if (scale > 1) scale = 1;
+        
+        return scale;
+    }
+};
+
 Flow.DefaultOptions = {
+    stacker: Flow.Stackers.normal,
+    scaler: Flow.Scalers.normal,
     verticalAlignment: "bottom",
     focusedClass: "focused",
     containerClass: "container",

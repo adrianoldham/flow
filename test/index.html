@@ -129,7 +129,13 @@
     <script type="text/javascript" charset="utf-8">
         function runTest() {
             var flowingPanorama = new FlowingPanorama("flow", "panorama", "#flow a", {
-                verticalAlignment: "middle"
+                overrideSelector: "#flow img",  // we want flow to grab the actual images (since we're scaling)
+                verticalAlignment: "middle",
+                centerFocus: true,
+                scrollCatchUp: 5,
+                stacker: Flow.Stackers.grouped, // stacker needs centerFocus on to work as desired
+                                                // NOTE: try Flow.Stackers.coverflow for a different stacker
+                scaler: Flow.Scalers.coverflow  // scaler needs centerFocus on to work as desired
             });
         }
         
