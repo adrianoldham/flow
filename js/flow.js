@@ -674,9 +674,18 @@ Flow.Scalers = {
     },
     
     coverflow: function(element, distance) {
-        var scale = (element.original.size.x / Math.abs(distance)) / 1;
+        var scale = (element.original.size.x / Math.abs(distance));
         scale *= 0.9;
         if (scale > 1) scale = 1;
+        
+        return scale;
+    },
+    
+    fisheye: function(element, distance) {
+        var scale = 1/((Math.pow(element.original.size.x, 4) / Math.pow(distance, 4)) * 25);
+        scale = 1 - scale;
+        if (scale > 1) scale = 1;
+        if (scale < 0) scale = 0;
         
         return scale;
     }
