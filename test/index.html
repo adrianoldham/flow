@@ -89,8 +89,8 @@
             margin-bottom: 20px;
         }
         
-        .focused img {
-            border: 5px solid black;
+        img.focused, .focused img {
+			border: 5px solid black;
         }
     </style>
 </head>
@@ -146,7 +146,7 @@
                 scrollCatchUp: 5,
                 stacker: Flow.Stackers.grouped, // stacker needs centerFocus on to work as desired
                                                 // NOTE: try Flow.Stackers.coverflow for a different stacker (or Flow.Stackers.normal)
-                scaler: Flow.Scalers.fisheye  // scaler needs centerFocus on to work as desired
+                scaler: Flow.Scalers.coverflow  // scaler needs centerFocus on to work as desired
             });
         }
         
