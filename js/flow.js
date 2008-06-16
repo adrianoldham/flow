@@ -639,7 +639,7 @@ Flow.Stackers = {
     grouped: function(element, distance) {
         var size = element.original.size.x;
         
-        var temp = ((Math.abs(distance) / size) + 1) / 2;
+        var temp = ((Math.abs(distance) / size) + 1) / 2.25;
         if (temp == 0) temp = 1;
         
         return distance / temp;
@@ -695,7 +695,7 @@ Flow.DefaultOptions = {
     zIndex: [100, 500],                     // range of the zIndex value for the images (the bigger the range, the more accurate the layering)
     stacker: Flow.Stackers.normal,
     scaler: Flow.Scalers.normal,
-    verticalAlignment: "bottom",
+    verticalAlignment: "middle",
     focusedClass: "focused",
     containerClass: "container",
     scrollBarClass: "scroll-bar",
