@@ -426,6 +426,13 @@ var Flow = Class.create({
     
     nextItem: function() {
         this.setPosition(this.target + this.biggestElement.original.size.x);
+    },
+    
+    clampTarget: function() {
+        if (!this.options.useIphoneOverflow) {
+            if (this.target < 0) this.target = 0;
+            if (this.target > this.actualSize.x) this.target = this.actualSize.x;
+        }
     }
 });
 
@@ -473,6 +480,8 @@ Flow.ScrollBar = Class.create({
                 this.parent.target = this.parent.actualSize.x + this.velocity;
             }
             
+            this.parent.clampTarget();
+            
             if (Math.abs(this.velocity) < 0.01) this.velocity = null;
         }
         
@@ -489,6 +498,7 @@ Flow.ScrollBar = Class.create({
             if (event.target != this.scrollWidget) this.dragOffset = 0;
             this.scrollPosition = this.positionFromMouse(event);
             this.parent.target = this.actualPosition();
+            this.parent.clampTarget();
         }.bind(this));
         
         $(document).observe("mousemove", function(event) {
@@ -497,7 +507,8 @@ Flow.ScrollBar = Class.create({
             if (!this.dragging) return;
             this.scrollPosition = this.positionFromMouse(event);
             this.parent.target = this.actualPosition();
-            
+            this.parent.clampTarget();
+
             if (this.mouse)
                 this.mouseDelta = { x: event.pageX - this.mouse.x, y: event.pageY - this.mouse.y };
             
@@ -547,6 +558,7 @@ Flow.ScrollBar = Class.create({
         var position = (this.scrollPosition / this.size.x) * this.parent.actualSize.x;
         
         if (this.options.scrollSnap) position = this.snap(position);
+        
         return position;
     },
     
@@ -586,8 +598,11 @@ Flow.Element = Class.create({
         var scale = this.parent.options.scaler(this, distance);
         
         var zIndexRange = this.parent.options.zIndex.last() - this.parent.options.zIndex.first();
+        var zIndex = parseInt((1 - Math.abs(distance) / (this.parent.size.x / 2)) * zIndexRange) + this.parent.options.zIndex.first();
+        if (zIndex < this.parent.options.zIndex.first()) zIndex = this.parent.options.zIndex.first();
+        
         this.element.setStyle({
-            zIndex: parseInt((1 - Math.abs(distance) / (this.parent.size.x / 2)) * zIndexRange) + this.parent.options.zIndex.first(),
+            zIndex: zIndex,
             width: Math.ceil(this.original.size.x * scale) + "px",
             height: Math.ceil(this.original.size.y * scale) + "px"
         });
@@ -674,15 +689,18 @@ Flow.Scalers = {
     },
     
     coverflow: function(element, distance) {
-        var scale = (element.original.size.x / Math.abs(distance));
-        scale *= 0.9;
+        var tweakyValue = 35;
+        
+        var scale = -Math.pow(Math.abs(distance / tweakyValue), 0.25) + 2;
+        
         if (scale > 1) scale = 1;
+        if (scale < 0) scale = 0.1;
         
         return scale;
     },
     
     fisheye: function(element, distance) {
-        var scale = 1/((Math.pow(element.original.size.x, 4) / Math.pow(distance, 4)) * 25);
+        var scale = 1 / ((Math.pow(element.original.size.x, 4) / Math.pow(distance, 4)) * 25);
         scale = 1 - scale;
         if (scale > 1) scale = 1;
         if (scale < 0) scale = 0;
@@ -692,6 +710,7 @@ Flow.Scalers = {
 };
 
 Flow.DefaultOptions = {
+    useIphoneOverflow: false,
     zIndex: [100, 500],                     // range of the zIndex value for the images (the bigger the range, the more accurate the layering)
     stacker: Flow.Stackers.normal,
     scaler: Flow.Scalers.normal,
