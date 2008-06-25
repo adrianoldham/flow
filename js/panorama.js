@@ -176,6 +176,7 @@ Panorama.Element = Class.create({
         if (temp < 0) temp = 0;
             
         this.scrollAmount = temp * sign * this.parent.options.mouseScrollSensitivity;
+        if (this.scrollAmount > this.parent.options.maxMouseScrollSpeed) this.scrollAmount = maxMouseScrollSpeed;
     },
     
     mouseLeave: function() {
@@ -184,6 +185,7 @@ Panorama.Element = Class.create({
 });
 
 Panorama.DefaultOptions = {
+    maxMouseScrollSpeed: 3,
     useMouseScroll: true,
     zIndex: 100,
     scrollSpeed: 1,
