@@ -428,7 +428,7 @@ var Flow = Class.create({
         this.setPosition(this.target + this.biggestElement.original.size.x);
     },
     
-    clampTarget: function() {
+    clampScrollTarget: function() {
         if (!this.options.useIphoneOverflow) {
             if (this.target < 0) this.target = 0;
             if (this.target > this.actualSize.x) this.target = this.actualSize.x;
@@ -479,8 +479,9 @@ Flow.ScrollBar = Class.create({
             if (this.parent.focalPoint > this.parent.actualSize.x && this.velocity >= 0) {
                 this.parent.target = this.parent.actualSize.x + this.velocity;
             }
-            
-            this.parent.clampTarget();
+
+            this.parent.clampTarget();            
+            this.parent.clampScrollTarget();
             
             if (Math.abs(this.velocity) < 0.01) this.velocity = null;
         }
@@ -498,7 +499,7 @@ Flow.ScrollBar = Class.create({
             if (event.target != this.scrollWidget) this.dragOffset = 0;
             this.scrollPosition = this.positionFromMouse(event);
             this.parent.target = this.actualPosition();
-            this.parent.clampTarget();
+            this.parent.clampScrollTarget();
         }.bind(this));
         
         $(document).observe("mousemove", function(event) {
@@ -507,7 +508,7 @@ Flow.ScrollBar = Class.create({
             if (!this.dragging) return;
             this.scrollPosition = this.positionFromMouse(event);
             this.parent.target = this.actualPosition();
-            this.parent.clampTarget();
+            this.parent.clampScrollTarget();
 
             if (this.mouse)
                 this.mouseDelta = { x: event.pageX - this.mouse.x, y: event.pageY - this.mouse.y };
