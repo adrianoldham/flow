@@ -126,12 +126,21 @@ var Flow = Class.create({
         if (this.options.centerFocus) offset += this.size.x / 2;
         
         var lastElement = this.elements.last();
+        var holderWidth = (lastElement.original.center.x + lastElement.original.size.x / 2 + offset);
+        if (holderWidth < this.size.x) holderWidth = this.size.x;
+        
         this.holder.setStyle({
-            width: (lastElement.original.center.x + lastElement.original.size.x / 2 + offset) + "px"
+            width: holderWidth + "px"
         });
         
+        var actualSize = (this.elements.last().original.center.x - this.excess.right - this.offset);
+        if (actualSize < this.size.x) {
+            actualSize = this.size.x;
+            this.options.useScrollBar = false;
+        }
+        
         this.container.insertBefore(this.holder, this.container.childElements().first());
-        this.actualSize = { x: (this.elements.last().original.center.x - this.excess.right - this.offset), y: this.container.getHeight() };
+        this.actualSize = { x: actualSize, y: this.container.getHeight() };
     },
     
     setupScrollBar: function() {
