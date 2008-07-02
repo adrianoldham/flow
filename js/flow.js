@@ -126,19 +126,21 @@ var Flow = Class.create({
         if (this.options.centerFocus) offset += this.size.x / 2;
         
         var lastElement = this.elements.last();
-        var holderWidth = (lastElement.original.center.x + lastElement.original.size.x / 2 + offset);
-        if (holderWidth < this.size.x) holderWidth = this.size.x;
+        var holderWidth = (lastElement.original.center.x + this.excess.left + offset);
+        
+        if (holderWidth - offset * 2 <= this.size.x) {
+            holderWidth = this.size.x + offset;
+            this.options.useScrollBar = false;
+            this.noScroll = true;
+        }
         
         this.holder.setStyle({
             width: holderWidth + "px"
         });
         
         var actualSize = (this.elements.last().original.center.x - this.excess.right - this.offset);
-        if (actualSize < this.size.x) {
-            actualSize = this.size.x;
-            this.options.useScrollBar = false;
-        }
-        
+        if (this.noScroll) actualSize = 0;
+                
         this.container.insertBefore(this.holder, this.container.childElements().first());
         this.actualSize = { x: actualSize, y: this.container.getHeight() };
     },
@@ -189,6 +191,11 @@ var Flow = Class.create({
             this.nextPageButton = new Element("div");
             this.nextPageButton.classNames().add(this.options.nextPageClass);
             this.wrapper.appendChild(this.nextPageButton);
+        }
+        
+        if (this.noScroll) {
+            this.previousPageButton.classNames().add(this.options.pagingDisabledClass);
+            this.nextPageButton.classNames().add(this.options.pagingDisabledClass);
         }
         
         this.previousPageButton.style.zIndex = this.options.zIndex.last() + 1;
@@ -392,26 +399,26 @@ var Flow = Class.create({
         return elementFound;
     },
     
-    clampTarget: function() {
+    clampTarget: function() {    
         if (this.target <= 0) {
-            if (this.previousPageButton) {
+            if (this.previousPageButton && !this.noScroll) {
                 this.previousPageButton.classNames().add(this.options.pagingDisabledClass);
             }
             this.target = 0;   
         } else {
-            if (this.previousPageButton) {
+            if (this.previousPageButton && !this.noScroll) {
                 this.previousPageButton.classNames().remove(this.options.pagingDisabledClass);
             }
         }
         
         if (this.target >= this.actualSize.x) {
-            if (this.nextPageButton) {
+            if (this.nextPageButton && !this.noScroll) {
                 this.nextPageButton.classNames().add(this.options.pagingDisabledClass);
             }
             
             this.target = this.actualSize.x;
         } else {
-            if (this.nextPageButton) {
+            if (this.nextPageButton && !this.noScroll) {
                 this.nextPageButton.classNames().remove(this.options.pagingDisabledClass);
             }
         }
@@ -440,7 +447,7 @@ var Flow = Class.create({
     clampScrollTarget: function() {
         if (!this.options.useIphoneOverflow) {
             if (this.target < 0) this.target = 0;
-            if (this.target > this.actualSize.x) this.target = this.actualSize.x;
+            if (this.target >= this.actualSize.x) this.target = this.actualSize.x;
         }
     }
 });
