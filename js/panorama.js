@@ -107,7 +107,9 @@ Panorama.Element = Class.create({
     },
     
     show: function(showFirst) {
+        if (this.parent.currentElement) clearTimeout(this.parent.currentElement.hider);
         this.parent.currentElement = this;
+        
         this.checkOverflow = true;
         
         this.target = 0;
@@ -130,6 +132,8 @@ Panorama.Element = Class.create({
         
         if (this.scroller) this.scroller.stop();
         this.scroller = new PeriodicalExecuter(this.update.bind(this), this.parent.options.updateDelay);
+        
+        this.startTime = (new Date()).getTime();
     },
     
     update: function() {
@@ -143,7 +147,19 @@ Panorama.Element = Class.create({
             if (this.scrollPosition < -this.size[Panorama.ATTRIBUTE[this.direction]] +
                 this.parent.size[Panorama.ATTRIBUTE[this.direction]] +
                 this.pixelsPerSecond) {
-                this.hide();
+                    
+                this.endTime = (new Date()).getTime();
+                this.timeUsed = this.endTime - this.startTime;
+                this.timeLeft = this.parent.options.minDelay - this.timeUsed;
+                
+                if (this.timeLeft > 0) {
+                    this.hider = setTimeout(this.hide.bind(this), this.timeLeft);
+                    this.checkOverflow = false;
+                    this.scroller.stop();
+                } else {
+                    this.hide();    
+                }
+                
                 return;
             }
         }
@@ -176,7 +192,7 @@ Panorama.Element = Class.create({
         if (temp < 0) temp = 0;
             
         this.scrollAmount = temp * sign * this.parent.options.mouseScrollSensitivity;
-        if (this.scrollAmount > this.parent.options.maxMouseScrollSpeed) this.scrollAmount = maxMouseScrollSpeed;
+        if (this.scrollAmount > this.parent.options.maxMouseScrollSpeed) this.scrollAmount = this.parent.options.maxMouseScrollSpeed;
     },
     
     mouseLeave: function() {
@@ -185,6 +201,7 @@ Panorama.Element = Class.create({
 });
 
 Panorama.DefaultOptions = {
+    minDelay: 5000,
     maxMouseScrollSpeed: 3,
     useMouseScroll: true,
     zIndex: 100,
