@@ -33,7 +33,7 @@ var Panorama = Class.create({
         if (element != this.currentElement) {
             this.previousElement = this.currentElement;
             this.currentElement.checkOverflow = true;
-            this.currentElement.hide(element);
+//            this.currentElement.hide(element);
         }
     },
     
@@ -153,7 +153,7 @@ Panorama.Element = Class.create({
                 this.timeLeft = this.parent.options.minDelay - this.timeUsed;
                 
                 if (this.timeLeft > 0) {
-                    this.hider = setTimeout(this.hide.bind(this), this.timeLeft);
+                    this.hider = setTimeout(this.hide.bind(this, null), this.timeLeft);
                     this.checkOverflow = false;
                     this.scroller.stop();
                 } else {
@@ -174,6 +174,7 @@ Panorama.Element = Class.create({
         
         this.element.setStyle({ zIndex: this.parent.options.zIndex - 1 });
         element = elementToShow || this.next;
+        
         element.show();
         
         this.checkOverflow = false;
