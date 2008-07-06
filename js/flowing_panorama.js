@@ -3,7 +3,7 @@ var FlowingPanorama = Class.create({
         this.panoramaContainer = $(panoramaContainer);
         this.flowContainer = $(flowContainer);
         
-        if (this.panoramaContaine == null || this.flowContainer == null) return;
+        if (this.panoramaContainer == null || this.flowContainer == null) return;
         
         this.anchors = $$(selector);
 
