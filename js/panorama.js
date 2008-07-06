@@ -33,7 +33,7 @@ var Panorama = Class.create({
         if (element != this.currentElement) {
             this.previousElement = this.currentElement;
             this.currentElement.checkOverflow = true;
-//            this.currentElement.hide(element);
+            this.currentElement.hide(element);
         }
     },
     
