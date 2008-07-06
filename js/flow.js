@@ -1,6 +1,9 @@
 var Flow = Class.create({
     initialize: function(wrapper, selector, options) {
         this.wrapper = $(wrapper);
+        
+        if (this.wrapper == null) return;
+        
         this.options = Object.extend(Object.extend({}, Flow.DefaultOptions), options || {});
         
         // override the selector if found in options

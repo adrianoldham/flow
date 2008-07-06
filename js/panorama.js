@@ -1,6 +1,9 @@
 var Panorama = Class.create({
     initialize: function(container, images, options) {
         this.container = $(container);
+        
+        if (this.container == null) return;
+        
         this.options = Object.extend(Object.extend({}, Panorama.DefaultOptions), options || {});
         
         if (typeof(images) == "string") images = $$(images);
