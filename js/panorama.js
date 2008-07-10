@@ -124,6 +124,7 @@ Panorama.Element = Class.create({
         });
         
         if (!showFirst) this.element.setOpacity(0);
+        if (this.parent.images == null || this.parent.images.length < 2) return;
         
         if (this.effect) this.effect.cancel();
         this.effect = new Effect.Appear(this.element, { afterFinish: function() {
