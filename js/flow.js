@@ -232,8 +232,11 @@ var Flow = Class.create({
     },
     
     autoScroll: function() {
+        var reachedEnd = this.target == this.actualSize.x;
+        
         this.setPosition(this.target + this.autoScrollAmount);        
-        if (this.target == 0 || this.target == this.actualSize.x) {
+        
+        if (this.target == 0 || reachedEnd) {
             switch (this.options.autoScrollFinishAction) {
                 case "rewind":
                     this.target = 0;
@@ -341,6 +344,8 @@ var Flow = Class.create({
     
     containerEnter: function(event) {
         if (this.options.autoHideScrollBar) this.toggleScrollBar(true);
+        
+        this.leftContainer = false;
     },
     
     containerLeave: function(event) {
@@ -355,7 +360,9 @@ var Flow = Class.create({
                 event.relatedTarget.descendantOf(this.scrollBar.scrollBar)) return;
         }
         
-        if (this.options.autoHideScrollBar) this.toggleScrollBar(false);
+        if (this.options.autoHideScrollBar && !this.scrollBar.dragging) this.toggleScrollBar(false);
+        
+        this.leftContainer = true;
     },
     
     toggleScrollBar: function(show) {
@@ -570,6 +577,8 @@ Flow.ScrollBar = Class.create({
         $(document.body).onmousedown   = function () { return true; }
         
         this.dragging = false;
+        
+        if (this.parent.leftContainer) this.parent.toggleScrollBar(false);
     },
     
     actualPosition: function() {
