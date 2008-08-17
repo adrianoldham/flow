@@ -53,7 +53,7 @@ var Flow = Class.create({
         this.target = 0;
         if (this.options.centerAtStart) this.target = this.actualSize.x / 2;
         
-        this.setPosition(this.target);
+        //this.setPosition(this.target);
         this.focalPoint = this.target;
     },
     
@@ -260,7 +260,15 @@ var Flow = Class.create({
             if (snap) this.target = this.scrollBar.snap(this.target);
             this.scrollBar.setPosition(this.target);
         }
+        
+        this.restartUpdater();
     }, 
+    
+    restartUpdater: function() {
+        if (this.updater == null) {
+            this.updater = new PeriodicalExecuter(this.update.bind(this), 0.01);
+        }
+    },
     
     keyScroll: function(event) {
         var leftFunction, rightFunction;
@@ -393,10 +401,17 @@ var Flow = Class.create({
         this.elements.each(function(flowElement) {
             flowElement.update();
         });
+        
+        if (!this.isScrolling()) {
+            this.updater.stop();
+            this.updater = null;
+        }
+        
+        $('test').innerHTML = parseInt($('test').innerHTML) + 1;
     },
     
     isScrolling: function() {
-        return Math.abs(this.target - this.focalPoint) > 0.01;
+        return Math.abs(this.target - this.focalPoint) > 0.001;
     },
     
     findFlowElement: function(element) {
@@ -510,6 +525,8 @@ Flow.ScrollBar = Class.create({
             this.parent.clampScrollTarget();
             
             if (Math.abs(this.velocity) < 0.01) this.velocity = null;
+
+            this.parent.restartUpdater();
         }
         
         var position = this.clampedScrollPosition();
@@ -526,6 +543,8 @@ Flow.ScrollBar = Class.create({
             this.scrollPosition = this.positionFromMouse(event);
             this.parent.target = this.actualPosition();
             this.parent.clampScrollTarget();
+            
+            this.parent.restartUpdater();
         }.bind(this));
         
         $(document).observe("mousemove", function(event) {
@@ -539,7 +558,9 @@ Flow.ScrollBar = Class.create({
             if (this.mouse)
                 this.mouseDelta = { x: event.pageX - this.mouse.x, y: event.pageY - this.mouse.y };
             
-            this.mouse = { x: event.pageX, y: event.pageY };            
+            this.mouse = { x: event.pageX, y: event.pageY };      
+            
+            this.parent.restartUpdater();                  
         }.bind(this));
         
         this.scrollWidget.observe("mousedown", this.startDrag.bindAsEventListener(this));
@@ -565,6 +586,8 @@ Flow.ScrollBar = Class.create({
         $(document.body).onmousedown   = function () { return false; }
         
         this.dragging = true;
+        
+        this.parent.restartUpdater();
     },
     
     stopDrag: function(event) {            
