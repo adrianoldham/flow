@@ -73,7 +73,8 @@ var Flow = Class.create({
     },    
     
     setupUpdater: function() {
-        this.updater = new PeriodicalExecuter(this.update.bind(this), 0.01);  
+//        this.updater = new PeriodicalExecuter(this.update.bind(this), 0.01);  
+        this.restartUpdater();
     },
     
     setupElements: function(elements) {
@@ -403,13 +404,15 @@ var Flow = Class.create({
         });
         
         if (!this.isScrolling()) {
-            if (this.updater) this.updater.stop();
+            if (this.updater) {this.updater.stop();}
             this.updater = null;
         }
+        
+        $('test').innerHTML = parseInt($('test').innerHTML) + 1;
     },
     
     isScrolling: function() {
-        return Math.abs(this.target - this.focalPoint) > 0.001;
+        return Math.abs(this.target - this.focalPoint) > 0.01;
     },
     
     findFlowElement: function(element) {
