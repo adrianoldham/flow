@@ -338,6 +338,8 @@ var Flow = Class.create({
             
             this.mouseScrollAmount = temp * sign * this.options.mouseScrollSensitivity;
         }
+        
+        this.restartUpdater();
     },
     
     mouseEnter: function(handler) {
