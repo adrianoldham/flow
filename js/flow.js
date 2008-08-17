@@ -407,8 +407,6 @@ var Flow = Class.create({
             if (this.updater) {this.updater.stop();}
             this.updater = null;
         }
-        
-        $('test').innerHTML = parseInt($('test').innerHTML) + 1;
     },
     
     isScrolling: function() {
