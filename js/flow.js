@@ -53,7 +53,7 @@ var Flow = Class.create({
         this.target = 0;
         if (this.options.centerAtStart) this.target = this.actualSize.x / 2;
         
-        //this.setPosition(this.target);
+        this.setPosition(this.target);
         this.focalPoint = this.target;
     },
     
@@ -403,11 +403,9 @@ var Flow = Class.create({
         });
         
         if (!this.isScrolling()) {
-            this.updater.stop();
+            if (this.updater) this.updater.stop();
             this.updater = null;
         }
-        
-        $('test').innerHTML = parseInt($('test').innerHTML) + 1;
     },
     
     isScrolling: function() {
