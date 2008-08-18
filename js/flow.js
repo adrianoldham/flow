@@ -25,7 +25,7 @@ var Flow = Class.create({
     
     getPosition: function() {
         var temp = this.container.cumulativeOffset();
-        this.position = { x: temp[0], y: temp[1] };  
+        this.position = { x: temp[0], y: temp[1] };
     },
     
     setupContainer: function() {        
@@ -98,7 +98,7 @@ var Flow = Class.create({
         this.focalPoint = 0;
         
         elements.each(function(element) {
-            var flowElement = new Flow.Element(element)
+            var flowElement = new Flow.Element(element);
             
             flowElement.parent = this;
             flowElement.previous = previous;
@@ -583,8 +583,8 @@ Flow.ScrollBar = Class.create({
         this.dragOffset = 0;
         this.dragOffset = this.positionFromMouse(event) - this.clampedScrollPosition();
         
-        $(document.body).onselectstart = function () { return false; }
-        $(document.body).onmousedown   = function () { return false; }
+        $(document.body).onselectstart = function () { return false; };
+        $(document.body).onmousedown   = function () { return false; };
         
         this.dragging = true;
         
@@ -597,8 +597,8 @@ Flow.ScrollBar = Class.create({
         if (Math.abs(this.velocity) > this.options.maxScrollVelocity) 
             this.velocity = this.options.maxScrollVelocity * (this.velocity / Math.abs(this.velocity));
         
-        $(document.body).onselectstart = function () { return true; }
-        $(document.body).onmousedown   = function () { return true; }
+        $(document.body).onselectstart = function () { return true; };
+        $(document.body).onmousedown   = function () { return true; };
         
         this.dragging = false;
         
@@ -606,7 +606,7 @@ Flow.ScrollBar = Class.create({
     },
     
     actualPosition: function() {
-        if (this.parent.autoScroller) this.parent.autoScroller.stop()
+        if (this.parent.autoScroller) this.parent.autoScroller.stop();
         
         var position = (this.scrollPosition / this.size.x) * this.parent.actualSize.x;
         
