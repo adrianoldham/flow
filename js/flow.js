@@ -377,11 +377,18 @@ var Flow = Class.create({
     },
     
     toggleScrollBar: function(show) {
-        if (!this.options.useScrollBar) return;
+        var duration = 0;
+        if (show == false) duration = this.options.hideScrollbarDelay;
         
-        if (this.scrollBarEffect) this.scrollBarEffect.cancel();
-        var effect = show ? Effect.Appear : Effect.Fade;
-        this.scrollBarEffect = new effect(this.scrollBar.scrollBar, { duration: 0.25 });   
+        if (this.scrollBarTimer) clearTimeout(this.scrollBarTimer);
+        
+        this.scrollBarTimer = setTimeout(function() {
+            if (!this.options.useScrollBar) return;
+        
+            if (this.scrollBarEffect) this.scrollBarEffect.cancel();
+            var effect = show ? Effect.Appear : Effect.Fade;
+            this.scrollBarEffect = new effect(this.scrollBar.scrollBar, { duration: 0.25 });   
+        }.bind(this), duration);
     },
     
     update: function() {        
@@ -794,5 +801,6 @@ Flow.DefaultOptions = {
     autoScrollType: "per-item", // per-page or per-item
     pagingType: "per-item",     // per-page or per-item
     keyScrollType: "per-item",  // per-page or per-item
+    hideScrollbarDelay: 1000,
     onFocus: function() {}
 };
