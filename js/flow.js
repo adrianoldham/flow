@@ -57,7 +57,15 @@ var Flow = Class.create({
         this.focalPoint = this.target;
     },
     
+    stopAutoScroll: function() {
+        this.autoScrollStopped = true;
+        this.autoScroller.stop();
+    },
+        
     setupAutoScroll: function() {
+        //if (this.autoScroller) this.stopAutoScroll();
+        
+        this.autoScrollStopped = false;
         this.autoScroller = new PeriodicalExecuter(this.autoScroll.bind(this), this.options.autoScrollDelay);
         
         switch (this.options.autoScrollType) {
@@ -69,7 +77,7 @@ var Flow = Class.create({
                 break;
         }
         
-        if (!this.options.autoScroll) this.autoScroller.stop();
+        if (!this.options.autoScroll) this.stopAutoScroll();
     },    
     
     setupUpdater: function() {
@@ -287,11 +295,11 @@ var Flow = Class.create({
         switch (event.keyCode) {
             case 37:
                 leftFunction();
-                if (this.autoScroller) this.autoScroller.stop();
+                if (this.autoScroller) this.stopAutoScroll();
                 break;
             case 39:
                 rightFunction();
-                if (this.autoScroller) this.autoScroller.stop();
+                if (this.autoScroller) this.stopAutoScroll();
                 break;
         }
     },
@@ -308,7 +316,7 @@ var Flow = Class.create({
 
         if (delta) {
             this.setPosition(this.target - (delta * this.biggestElement.original.size.x));
-            if (this.autoScroller) this.autoScroller.stop();
+            if (this.autoScroller) this.stopAutoScroll();
         }
 
         if (event.preventDefault) event.preventDefault();
@@ -322,7 +330,7 @@ var Flow = Class.create({
         if (this.scrollBar && this.scrollBar.dragging) {
             this.mouseScrollAmount = 0;
         } else {
-            if (this.autoScroller) this.autoScroller.stop();
+            if (this.autoScroller) this.stopAutoScroll();
             
             var sign = 0;
             var temp = ((event.pageX - this.position.x) - this.size.x / 2);
@@ -397,7 +405,7 @@ var Flow = Class.create({
         this.focalPoint += (this.target - this.focalPoint) / this.options.scrollCatchUp;
         this.container.scrollLeft = this.focalPoint + this.offset;
         
-        if (this.options.autoScroll && this.isScrolling()) {
+        if (this.options.autoScroll && this.isScrolling() && this.autoScrollStopped) {
             clearTimeout(this.autoScrollRestarter);
             this.autoScrollRestarter = setTimeout(this.setupAutoScroll.bind(this), 2000);
         }
@@ -613,7 +621,7 @@ Flow.ScrollBar = Class.create({
     },
     
     actualPosition: function() {
-        if (this.parent.autoScroller) this.parent.autoScroller.stop();
+        if (this.parent.autoScroller) this.parent.stopAutoScroll();
         
         var position = (this.scrollPosition / this.size.x) * this.parent.actualSize.x;
         
