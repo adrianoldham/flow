@@ -7,7 +7,7 @@ Element.addMethods({
         
         if (element.complete != null) {
             if (element.src == blankPixel) return;        
-            if (!["png"].include(element.src.toLowerCase().split('.').last())) return;
+            if (!element.src.toLowerCase().indexOf(".png")) return;
             
             // wait till image is preloaded
             if (!element.complete) {
@@ -26,12 +26,14 @@ Element.addMethods({
             var src = $(element).getStyle("backgroundImage");
             var startIndex = src.indexOf("(\"") + 2;
             var length = src.indexOf("\")");
-            src = src.substring(startIndex, length);
             
-            if (!["png"].include(src.toLowerCase().split('.').last())) return;
+            src = src.substring(startIndex, length);
+            if (!src.toLowerCase().indexOf(".png")) return;
 
             element.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + src + "',sizingMethod='scale')";
-            element.setStyle({ backgroundImage: "none" });
+            element.setStyle({ background: "none" });
+            
+            alert(element.getStyle('background'))
         }
     }
 });

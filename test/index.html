@@ -56,7 +56,7 @@
             margin: auto;
         }
 
-        .previous-page {
+        .previous-page, .previous-disabled {
             width: 30px;
             height: 30px;
             position: absolute;
@@ -65,12 +65,12 @@
             background: transparent url(images/left.png) no-repeat;            
             cursor: pointer;
         }
+
+		.previous-disabled {
+			background: transparent url(images/right.png) no-repeat;            
+		}
         
-        .disabled {
-            display: none;
-        }
-        
-        .next-page {
+        .next-page, .next-disabled {
             width: 30px;
             height: 30px;
             position: absolute;
@@ -79,6 +79,10 @@
             background: transparent url(images/right.png) no-repeat;
             cursor: pointer;     
         }
+
+		.next-disabled {
+			background: transparent url(images/left.png) no-repeat;            
+		}
         
         #panorama {
             width: 1003px;
