@@ -441,27 +441,27 @@ var Flow = Class.create({
     clampTarget: function() {    
         if (this.target <= 0) {
             if (this.previousPageButton && !this.noScroll) {
-                this.previousPageButton.classNames().remove(this.options.previousClass);
+                this.previousPageButton.classNames().remove(this.options.previousPageClass);
                 this.previousPageButton.classNames().add(this.options.previousDisabledClass);
             }
             this.target = 0;   
         } else {
             if (this.previousPageButton && !this.noScroll) {
-                this.previousPageButton.classNames().add(this.options.previousClass);
+                this.previousPageButton.classNames().add(this.options.previousPageClass);
                 this.previousPageButton.classNames().remove(this.options.previousDisabledClass);
             }
         }
         
         if (this.target >= this.actualSize.x) {
             if (this.nextPageButton && !this.noScroll) {
-                this.nextPageButton.classNames().remove(this.options.nextClass);
+                this.nextPageButton.classNames().remove(this.options.nextPageClass);
                 this.nextPageButton.classNames().add(this.options.nextDisabledClass);
             }
             
             this.target = this.actualSize.x;
         } else {
             if (this.nextPageButton && !this.noScroll) {
-                this.nextPageButton.classNames().add(this.options.nextClass);
+                this.nextPageButton.classNames().add(this.options.nextPageClass);
                 this.nextPageButton.classNames().remove(this.options.nextDisabledClass);
             }
         }
