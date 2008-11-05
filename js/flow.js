@@ -529,7 +529,9 @@ Flow.ScrollBar = Class.create({
         if (this.velocity != null) {
             this.velocity *= this.options.scrollBarFriction;
             this.scrollPosition += this.velocity;
-            this.parent.target = this.actualPosition();
+            
+            var position = this.actualPosition();
+            if (position) this.parent.target = position;
 
             if (this.parent.focalPoint < 0 && this.velocity <= 0) {
                 this.parent.target = this.velocity;
