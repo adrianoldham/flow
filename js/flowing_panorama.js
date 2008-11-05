@@ -35,4 +35,4 @@ var FlowingPanorama = Class.create({
         
         return this.images;
     }
-})
+});
