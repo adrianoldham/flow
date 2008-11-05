@@ -32,8 +32,6 @@ Element.addMethods({
 
             element.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + src + "',sizingMethod='scale')";
             element.setStyle({ background: "none" });
-            
-            alert(element.getStyle('background'))
         }
     }
 });
