@@ -101,7 +101,9 @@ Panorama.Element = Class.create({
         if (this.element.parentNode == null) this.parent.container.appendChild(this.element);
         this.size = { x: this.element.getWidth(), y: this.element.getHeight() };        
         
-        this.direction = this.size.x < this.size.y ? Panorama.VERTICAL : Panorama.HORIZONTAL;
+        this.direction =
+            (this.size.x - this.parent.size.x) < (this.size.y - this.parent.size.y)
+            ? Panorama.VERTICAL : Panorama.HORIZONTAL;
         
         this.parent.container.observe("mousemove", this.mouseScroll.bind(this));
         this.parent.container.observe("mouseout", this.mouseLeave.bind(this));
