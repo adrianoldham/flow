@@ -379,10 +379,6 @@ var Flow = Class.create({
         
         this.setPosition(this.target);
         if (!this.options.useScrollBar) return;
-                
-        console.log('left');
-        console.log(event.relatedTarget);
-        console.log(event.currentTarget)
         
         if (this.scrollBar) {
             if (event.relatedTarget == this.scrollBar.scrollBar || 
