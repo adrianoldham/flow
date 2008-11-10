@@ -6,6 +6,8 @@ var FlowingPanorama = Class.create({
         if (this.panoramaContainer == null || this.flowContainer == null) return;
         
         this.anchors = $$(selector);
+        
+        if (this.anchors.length == 0) return;
 
         this.flow = new Flow(this.flowContainer, selector, Object.extend(flowOptions || {}, {
             onFocus: function(element) {

@@ -9,6 +9,8 @@ var Panorama = Class.create({
         if (typeof(images) == "string") images = $$(images);
         this.images = images;
         
+        if (this.images.length == 0) return;
+        
         this.setupContainer();        
         this.preloadImages();
     },
@@ -131,9 +133,11 @@ Panorama.Element = Class.create({
         this.effect = new Effect.Appear(this.element, { afterFinish: function() {
             if (this.parent.previousElement) this.parent.previousElement.scroller.stop();
             this.parent.previousElement = this;
-            this.parent.options.onChange(); }.bind(this),
+             }.bind(this),
             duration: this.parent.options.transitionSpeed
         });
+        
+        this.parent.options.onChange();
         
         if (this.scroller) this.scroller.stop();
         this.scroller = new PeriodicalExecuter(this.update.bind(this), this.parent.options.updateDelay);

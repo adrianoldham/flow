@@ -9,6 +9,8 @@ var Flow = Class.create({
         // override the selector if found in options
         if (this.options.overrideSelector) selector = this.options.overrideSelector;
         
+        if ($$(selector).length == 0) return;
+        
         this.offset = this.options.maxScrollVelocity;
         this.container = this.wrapper.getElementsBySelector("." + this.options.containerClass).first();
         
@@ -120,7 +122,10 @@ var Flow = Class.create({
                 element.observe("click", function(event) {
                     this.options.onFocus(flowElement);
                     this.scrollToElement(flowElement);                
-                    event.stop();
+                    
+                    if (this.options.enableClickEvents) {
+                        event.stop();
+                    }
                 }.bind(this));
             }
             
@@ -175,6 +180,9 @@ var Flow = Class.create({
         
         scrollBar.style.zIndex = this.options.zIndex.last() + 1;
         this.scrollBar = new Flow.ScrollBar(scrollBar, this.options, this);
+        
+        // make sure scroll bar activates container leave too
+        scrollBar.observe("mouseout", this.mouseEnter.bind(this)(this.containerLeave.bindAsEventListener(this)));
     },
     
     setupPageButtons: function() {
@@ -365,12 +373,16 @@ var Flow = Class.create({
         this.leftContainer = false;
     },
     
-    containerLeave: function(event) {
+    containerLeave: function(event) {        
         if (this.mouseScrollAmount != 0) this.setPosition(this.target);
         this.mouseScrollAmount = 0;
         
         this.setPosition(this.target);
         if (!this.options.useScrollBar) return;
+                
+        console.log('left');
+        console.log(event.relatedTarget);
+        console.log(event.currentTarget)
         
         if (this.scrollBar) {
             if (event.relatedTarget == this.scrollBar.scrollBar || 
@@ -815,5 +827,6 @@ Flow.DefaultOptions = {
     pagingType: "per-item",     // per-page or per-item
     keyScrollType: "per-item",  // per-page or per-item
     hideScrollbarDelay: 1000,
+    enableClickEvents: false,
     onFocus: function() {}
 };
