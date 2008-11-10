@@ -123,7 +123,7 @@ var Flow = Class.create({
                     this.options.onFocus(flowElement);
                     this.scrollToElement(flowElement);                
                     
-                    if (this.options.enableClickEvents) {
+                    if (!this.options.enableClickEvents) {
                         event.stop();
                     }
                 }.bind(this));
