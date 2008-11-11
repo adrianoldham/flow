@@ -24,10 +24,18 @@
             overflow: hidden;
             background: transparent url(images/bg.gif);
         }
-        
+
         #flow img {
-            margin: 0;
+            margin: 0 25px;
         }
+
+        #flow .first img {
+			margin-left: 0;
+		}
+
+        #flow .last img {
+			margin-right: 0;
+		}
         
         a img {
             border: none;
@@ -103,7 +111,7 @@
     </div>
     <div id="flow">
         <div class="container">
-            <a href="images/pano1.jpg"><img src="images/thumb1.jpg"/></a>
+            <a class="first" href="images/pano1.jpg"><img src="images/thumb1.jpg"/></a>
             <a href="images/pano2.jpg"><img src="images/thumb1.jpg"/></a>
             <a href="images/pano1.jpg"><img src="images/thumb1.jpg"/></a>
             <a href="images/pano2.jpg"><img src="images/thumb1.jpg"/></a>
@@ -118,14 +126,14 @@
             <a href="images/pano1.jpg"><img src="images/thumb1.jpg"/></a>
             <a href="images/pano1.jpg"><img src="images/thumb1.jpg"/></a>
             <a href="images/pano1.jpg"><img src="images/thumb1.jpg"/></a>
-            <a href="images/pano1.jpg"><img src="images/thumb1.jpg"/></a>
+            <a class="last" href="images/pano1.jpg"><img src="images/thumb1.jpg"/></a>
         </div>
     </div>
     
     <script type="text/javascript" charset="utf-8">
         function runTest() {
             var flowingPanorama = new FlowingPanorama("flow", "panorama", "#flow a", {
-                overrideSelector: "#flow img",  // we want flow to grab the actual images (since we're scaling)
+                overrideSelector: "#flow a",  // we want flow to grab the actual images (since we're scaling)
                 verticalAlignment: "middle",    // try top, middle or bottom
                 centerFocus: false,
                 scrollCatchUp: 5,

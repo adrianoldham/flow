@@ -92,7 +92,7 @@ var Flow = Class.create({
             this.excess = { left: this.size.x / 2, right: this.size.x / 2 };
         } else {
             var size = elements.first().getWidth() / 2;
-            this.excess = { left: size, right: this.size.x - size };
+            this.excess = { left: size, right: this.size.x - size  };
         }
         
         this.holder = new Element("div");
@@ -156,6 +156,11 @@ var Flow = Class.create({
         });
         
         var actualSize = (this.elements.last().original.center.x - this.excess.right - this.offset);
+        
+        // adjust for right margins
+        var centerIndex = parseInt(this.elements.length / 2);
+        actualSize -= (this.elements[centerIndex].original.size.x - lastElement.original.size.x);
+        
         if (this.noScroll) actualSize = 0;
                 
         this.container.insertBefore(this.holder, this.container.childElements().first());
