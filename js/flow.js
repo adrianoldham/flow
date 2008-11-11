@@ -629,7 +629,7 @@ Flow.ScrollBar = Class.create({
         
         this.dragging = false;
         
-        if (this.parent.leftContainer) this.parent.toggleScrollBar(false);
+        if (this.parent.leftContainer && this.options.autoHideScrollBar) this.parent.toggleScrollBar(false);
     },
     
     actualPosition: function() {
