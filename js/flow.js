@@ -144,8 +144,8 @@ var Flow = Class.create({
         if (this.options.centerFocus) offset += this.size.x / 2;
         
         var lastElement = this.elements.last();
-        var holderWidth = (lastElement.original.center.x + this.excess.left + offset);
-        
+        var holderWidth = (lastElement.original.center.x + elements.last().getWidth() / 2 + offset);
+
         if (holderWidth - offset * 2 <= this.size.x) {
             holderWidth = this.size.x + offset;
             this.options.useScrollBar = false;
