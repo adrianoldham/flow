@@ -218,10 +218,47 @@ var Flow = Class.create({
             this.nextPageButton.classNames().add(this.options.nextPageClass);
             this.wrapper.appendChild(this.nextPageButton);
         }
+        
+        var isIE = (/MSIE (5\.5|6\.)/.test(navigator.userAgent) && navigator.platform == "Win32");
+        
+        if (isIE) {
+            this.previousDisableButton = new Element("div");
+            //this.previousDisableButton.classNames().add(this.options.previousPageClass);
+            this.previousDisableButton.classNames().add(this.options.previousDisabledClass);   
             
+            this.previousDisableButton.style.zIndex = this.options.zIndex.last() + 1;
+            this.previousDisableButton.style.display = "none";
+            
+            this.previousPageButton.insert({ after: this.previousDisableButton });
+            this.previousDisableButton.iePNGFix();
+            
+            this.nextDisableButton = new Element("div");
+            //this.nextDisableButton.classNames().add(this.options.nextPageClass);
+            this.nextDisableButton.classNames().add(this.options.nextDisabledClass);
+            
+            this.nextDisableButton.style.zIndex = this.options.zIndex.last() + 1;
+            this.nextDisableButton.style.display = "none";
+
+            this.nextPageButton.insert({ after: this.nextDisableButton });
+            this.nextDisableButton.iePNGFix();
+        }
+        
         if (this.noScroll) {
-            this.nextPageButton.classNames().add(this.options.pagingDisabledClass);                
-            this.previousPageButton.classNames().add(this.options.pagingDisabledClass);
+            if (this.nextDisableButton) {
+                this.nextPageButton.style.display = "none";
+                this.nextDisableButton.style.display = "block";
+            }
+            else {
+                this.nextPageButton.classNames().add(this.options.pagingDisabledClass);                
+            }
+            
+            if (this.previousDisableButton) {
+                this.previousPageButton.style.display = "none";
+                this.previousDisableButton.style.display = "block";
+            }
+            else {
+                this.previousPageButton.classNames().add(this.options.pagingDisabledClass);
+            }
         }
         
         this.previousPageButton.style.zIndex = this.options.zIndex.last() + 1;
@@ -379,7 +416,7 @@ var Flow = Class.create({
         this.leftContainer = false;
     },
     
-    containerLeave: function(event) {        
+    containerLeave: function(event) {
         if (this.mouseScrollAmount != 0) this.setPosition(this.target);
         this.mouseScrollAmount = 0;
         
@@ -455,28 +492,44 @@ var Flow = Class.create({
     clampTarget: function() {    
         if (this.target <= 0) {
             if (this.previousPageButton && !this.noScroll) {
-                this.previousPageButton.classNames().remove(this.options.previousPageClass);
-                this.previousPageButton.classNames().add(this.options.previousDisabledClass);
+                if (this.previousDisableButton) {
+                    this.previousPageButton.style.display = "none";
+                    this.previousDisableButton.style.display = "block";
+                } else {
+                    this.previousPageButton.classNames().add(this.options.previousDisabledClass);
+                }
             }
             this.target = 0;   
         } else {
             if (this.previousPageButton && !this.noScroll) {
-                this.previousPageButton.classNames().add(this.options.previousPageClass);
-                this.previousPageButton.classNames().remove(this.options.previousDisabledClass);
+                if (this.previousDisableButton) {
+                    this.previousDisableButton.style.display = "none";
+                    this.previousPageButton.style.display = "block";
+                } else {
+                    this.previousPageButton.classNames().remove(this.options.previousDisabledClass);
+                }
             }
         }
         
         if (this.target >= this.actualSize.x) {
             if (this.nextPageButton && !this.noScroll) {
-                this.nextPageButton.classNames().remove(this.options.nextPageClass);
-                this.nextPageButton.classNames().add(this.options.nextDisabledClass);
+                if (this.nextDisableButton) {
+                    this.nextPageButton.style.display = "none";
+                    this.nextDisableButton.style.display = "block";
+                } else {
+                    this.nextPageButton.classNames().add(this.options.nextDisabledClass);
+                }
             }
             
             this.target = this.actualSize.x;
         } else {
             if (this.nextPageButton && !this.noScroll) {
-                this.nextPageButton.classNames().add(this.options.nextPageClass);
-                this.nextPageButton.classNames().remove(this.options.nextDisabledClass);
+                if (this.nextDisableButton) {
+                    this.nextPageButton.style.display = "block";
+                    this.nextDisableButton.style.display = "none";
+                } else {
+                    this.nextPageButton.classNames().remove(this.options.nextDisabledClass);
+                }
             }
         }
     },
