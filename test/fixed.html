@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+	<title>fixed</title>
+    <script type="text/javascript" charset="utf-8" src="../lib/prototype.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../lib/scriptaculous.js?load=effects"></script>
+    <script type="text/javascript" charset="utf-8" src="../js/helper.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../js/panorama.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../js/fixed_panorama.js"></script>
+
+	<style type="text/css" media="screen">
+		#panorama {
+			height: 234px;
+			width: 1024px;
+		}
+		
+		#fixed {
+			margin-top: 20px;
+		}
+		
+		#fixed img {
+			border-style: none;
+			padding-bottom: 5px;
+			margin-right: 5px;
+			border-bottom: 2px solid #fff;
+		}
+		
+		#fixed .focused img {
+			border-color: #aaa;
+		}
+		
+	</style>
+</head>
+
+<body>
+	<div id="panorama">
+	</div>
+	<div id="fixed">
+        <a href="images/pano2.jpg"><img src="images/thumb2.jpg"/></a>
+        <a href="images/pano1.jpg"><img src="images/thumb1.jpg"/></a>
+	</div>
+    <script type="text/javascript" charset="utf-8">
+        function runTest() {
+            var fixedPanorama = new FixedPanorama("fixed", "panorama", "#fixed a");
+        }
+        
+        Event.observe(window, "load", runTest);
+    </script>
+</body>
+</html>
