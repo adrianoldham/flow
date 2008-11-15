@@ -31,7 +31,7 @@ var FixedPanorama = Class.create({
         $(document).observe("keydown", this.keyScroll.bindAsEventListener(this));
         
         // make sure first item is focused
-        this.panorama.options.onChange();
+        this.focusOn(0);
     },
     
     clampIndex: function(index) {
