@@ -580,7 +580,6 @@ Flow.ScrollBar = Class.create({
         
         this.scrollWidget = this.scrollBar.getElementsBySelector("." + this.options.scrollWidgetClass).first();
         this.scrollWidget.iePNGFix();
-        this.scrollBar.iePNGFix();
         
         this.size = { x: this.scrollBar.getWidth() - this.scrollWidget.getWidth() };
         this.widgetSize = { x: this.scrollWidget.getWidth() };
