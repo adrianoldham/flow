@@ -332,6 +332,43 @@ var Flow = Class.create({
         }
     },
     
+    focusOnElement: function(element) {
+        this.options.onFocus(element);
+        this.scrollToElement(element);
+    },
+    
+    focusOnPreviousElement: function() {
+        var focused = this.focusedElement();
+        var index = 0;
+        if (focused != null) {
+            index = this.elements.indexOf(focused) - 1;
+            if (index < 0) index = 0;   
+        }
+        this.focusOnElement(this.elements[index]);
+    },
+    
+    focusOnNextElement: function() {
+        var focused = this.focusedElement();
+        var index = 0;
+        if (focused != null) {
+            index = this.elements.indexOf(focused) + 1;
+            if (index >= this.elements.length) index = this.elements.length - 1;
+        }
+        this.focusOnElement(this.elements[index]);
+    },
+    
+    focusedElement: function() {
+        var focused;
+        
+        this.elements.each(function(element) {
+            if (element.element.hasClassName(this.options.focusedClass)) {
+                focused = element;
+            }
+        }.bind(this));
+        
+        return focused;
+    },
+    
     keyScroll: function(event) {
         var leftFunction, rightFunction;
         switch (this.options.keyScrollType){
@@ -342,6 +379,10 @@ var Flow = Class.create({
             case "per-item":
                 leftFunction = this.previousItem.bind(this);
                 rightFunction = this.nextItem.bind(this);                
+                break;
+            case "per-item-and-focus":
+                leftFunction = this.focusOnPreviousElement.bind(this);
+                rightFunction = this.focusOnNextElement.bind(this);
                 break;
         }
         
