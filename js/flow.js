@@ -189,6 +189,10 @@ var Flow = Class.create({
         
         // make sure scroll bar activates container leave too
         scrollBar.observe("mouseout", this.mouseEnter.bind(this)(this.containerLeave.bindAsEventListener(this)));
+        
+        if (this.options.autoHideScrollBar) {
+            scrollBar.hide();
+        }
     },
     
     setupPageButtons: function() {
