@@ -35,8 +35,8 @@ var FixedPanorama = Class.create({
     },
     
     clampIndex: function(index) {
-        if (index < 0) index = 0;
-        if (index >= this.anchors.length) index = this.anchors.length - 1;
+        if (index < 0) index = this.anchors.length - 1;
+        if (index >= this.anchors.length) index = 0;
         
         return index;
     },
