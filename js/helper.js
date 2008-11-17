@@ -1,13 +1,15 @@
 // precheck if IE
 var isIE = (/MSIE (5\.5|6\.)/.test(navigator.userAgent) && navigator.platform == "Win32");
 
+var PNG_FORMAT = /^.+\.((png))$/;
+
 Element.addMethods({ 
     iePNGFix: function(element, blankPixel) {
         if (!isIE) return;
         
         if (element.complete != null) {
             if (element.src == blankPixel) return;        
-            if (!element.src.toLowerCase().indexOf(".png")) return;
+            if (!PNG_FORMAT.test(element.src.toLowerCase())) return;
             
             // wait till image is preloaded
             if (!element.complete) {
@@ -28,7 +30,7 @@ Element.addMethods({
             var length = src.indexOf("\")");
             
             src = src.substring(startIndex, length);
-            if (!src.toLowerCase().indexOf(".png")) return;
+            if (!PNG_FORMAT.test(src.toLowerCase())) return;
 
             element.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + src + "',sizingMethod='scale')";
             element.setStyle({ background: "none" });
