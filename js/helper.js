@@ -1,5 +1,5 @@
 // precheck if IE
-var isIE = (/MSIE (5\.5|6\.|7\.)/.test(navigator.userAgent) && navigator.platform == "Win32");
+var isIE = (/MSIE (5\.5|6\.)/.test(navigator.userAgent) && navigator.platform == "Win32");
 
 var PNG_FORMAT = /^.+\.((png))$/;
 
