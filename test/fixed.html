@@ -46,7 +46,9 @@
 	</div>
     <script type="text/javascript" charset="utf-8">
         function runTest() {
-            var fixedPanorama = new FixedPanorama("fixed", "panorama", "#fixed a");
+            var fixedPanorama = new FixedPanorama("fixed", "panorama", "#fixed a", {
+				useMouseScroll: false
+			});
         }
         
         Event.observe(window, "load", runTest);

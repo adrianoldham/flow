@@ -106,6 +106,10 @@ Panorama.Element = Class.create({
         this.direction =
             (this.size.x - this.parent.size.x) < (this.size.y - this.parent.size.y)
             ? Panorama.VERTICAL : Panorama.HORIZONTAL;
+
+        if (this.parent.options.useMouseStop) {
+            this.parent.container.observe("mouseover", this.mouseEnter.bind(this));        
+        }
         
         this.parent.container.observe("mousemove", this.mouseScroll.bind(this));
         this.parent.container.observe("mouseout", this.mouseLeave.bind(this));
@@ -131,7 +135,7 @@ Panorama.Element = Class.create({
         
         if (this.effect) this.effect.cancel();
         this.effect = new Effect.Appear(this.element, { afterFinish: function() {
-            if (this.parent.previousElement) this.parent.previousElement.scroller.stop();
+            if (this.parent.previousElement && this.parent.previousElement.scroller) this.parent.previousElement.scroller.stop();
             this.parent.previousElement = this;
              }.bind(this),
             duration: this.parent.options.transitionSpeed
@@ -143,9 +147,11 @@ Panorama.Element = Class.create({
         this.scroller = new PeriodicalExecuter(this.update.bind(this), this.parent.options.updateDelay);
         
         this.startTime = (new Date()).getTime();
+
+        this.hideDelay = false;
     },
     
-    update: function() {
+    update: function() {        
         this.scrollPosition += (this.target - this.scrollPosition) / this.parent.options.scrollCatchUp;        
         this.target -= this.scrollAmount;
         
@@ -165,6 +171,8 @@ Panorama.Element = Class.create({
                     this.hider = setTimeout(this.hide.bind(this, null), this.timeLeft);
                     this.checkOverflow = false;
                     this.scroller.stop();
+                    
+                    this.hideDelay = true;
                 } else {
                     this.hide();    
                 }
@@ -209,6 +217,11 @@ Panorama.Element = Class.create({
     
     mouseLeave: function() {
         this.scrollAmount = this.parent.options.scrollSpeed;
+    },
+
+    mouseEnter: function() {
+        this.scrollAmount = 0;
+        this.target = this.scrollPosition;
     }
 });
 
@@ -216,6 +229,7 @@ Panorama.DefaultOptions = {
     minDelay: 5000,
     maxMouseScrollSpeed: 3,
     useMouseScroll: true,
+    useMouseStop: true,
     zIndex: 100,
     scrollSpeed: 1,
     updateDelay: 0.05,

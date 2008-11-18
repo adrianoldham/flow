@@ -342,7 +342,9 @@ var Flow = Class.create({
         var index = 0;
         if (focused != null) {
             index = this.elements.indexOf(focused) - 1;
-            if (index < 0) index = 0;   
+            if (index < 0) {
+                index = this.options.keyScrollLoop ? this.elements.length - 1 : 0;   
+            }
         }
         this.focusOnElement(this.elements[index]);
     },
@@ -352,7 +354,9 @@ var Flow = Class.create({
         var index = 0;
         if (focused != null) {
             index = this.elements.indexOf(focused) + 1;
-            if (index >= this.elements.length) index = this.elements.length - 1;
+            if (index >= this.elements.length) {
+                index = this.options.keyScrollLoop ? 0 : this.elements.length - 1;
+            }
         }
         this.focusOnElement(this.elements[index]);
     },
@@ -925,7 +929,8 @@ Flow.DefaultOptions = {
     autoScrollFinishAction: "rewind", // reverse or rewind
     autoScrollType: "per-item", // per-page or per-item
     pagingType: "per-item",     // per-page or per-item
-    keyScrollType: "per-item",  // per-page or per-item
+    keyScrollType: "per-item",  // per-page or per-item or per-item-and-focus
+    keyScrollLoop: true,        // scrolling via keys is wrapped if true
     hideScrollbarDelay: 1000,
     enableClickEvents: false,
     onFocus: function() {}
