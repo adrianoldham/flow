@@ -99,7 +99,7 @@ var Panorama = Class.create({
         this.currentElement.scrollAmount = 0;
         this.currentElement.target = this.currentElement.scrollPosition;
         
-        clearTimeout(this.currentElement.hider)
+        clearTimeout(this.currentElement.hider);
         this.currentElement.checkOverflow = true;
         
         this.pauseDiv.show();
