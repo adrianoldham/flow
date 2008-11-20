@@ -56,6 +56,11 @@ var Panorama = Class.create({
         if (this.options.useMouseStop) {
             this.container.observe("mouseover", this.mouseEnter.bind(this));       
             this.container.observe("mouseout", this.mouseLeave.bind(this)); 
+            
+            // add pause notifier only if mouse stop is on        
+            this.pauseDiv = new Element("div", { 'class': this.options.pausedClass }).update(this.options.pausedText);
+            this.container.appendChild(this.pauseDiv);
+            this.pauseDiv.hide();
         }
     },
     
@@ -86,6 +91,8 @@ var Panorama = Class.create({
             this.currentElement.checkOverflow = false;    
             this.currentElement.hideDelay = true;
         }
+        
+        this.pauseDiv.hide();
     },
     
     mouseEnter: function() {
@@ -94,6 +101,8 @@ var Panorama = Class.create({
         
         clearTimeout(this.currentElement.hider)
         this.currentElement.checkOverflow = true;
+        
+        this.pauseDiv.show();
     }
 });
 
@@ -250,5 +259,7 @@ Panorama.DefaultOptions = {
     mouseScrollSensitivity: 0.04,
     transitionSpeed: 1,
     scrollCatchUp: 20,
+    pausedClass: 'paused',
+    pausedText: 'Paused',
     onChange: function() {}
 };
