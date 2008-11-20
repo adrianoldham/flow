@@ -52,6 +52,11 @@ var Panorama = Class.create({
         
         var temp = this.container.cumulativeOffset();
         this.position = { x: temp[0], y: temp[1] };
+        
+        if (this.options.useMouseStop) {
+            this.container.observe("mouseover", this.mouseEnter.bind(this));       
+            this.container.observe("mouseout", this.mouseLeave.bind(this)); 
+        }
     },
     
     setupElements: function(elements) {
@@ -72,6 +77,23 @@ var Panorama = Class.create({
     
     currentIndex: function() {
         return this.elements.index(this.currentElement);
+    },
+    
+    mouseLeave: function() {
+        if (this.currentElement.hideDelay) {
+            this.currentElement.hider = setTimeout(this.currentElement.hide.bind(this.currentElement, null), this.options.minDelay);
+        
+            this.currentElement.checkOverflow = false;    
+            this.currentElement.hideDelay = true;
+        }
+    },
+    
+    mouseEnter: function() {
+        this.currentElement.scrollAmount = 0;
+        this.currentElement.target = this.currentElement.scrollPosition;
+        
+        clearTimeout(this.currentElement.hider)
+        this.currentElement.checkOverflow = true;
     }
 });
 
@@ -107,10 +129,6 @@ Panorama.Element = Class.create({
             (this.size.x - this.parent.size.x) < (this.size.y - this.parent.size.y)
             ? Panorama.VERTICAL : Panorama.HORIZONTAL;
 
-        if (this.parent.options.useMouseStop) {
-            this.parent.container.observe("mouseover", this.mouseEnter.bind(this));        
-        }
-        
         this.parent.container.observe("mousemove", this.mouseScroll.bind(this));
         this.parent.container.observe("mouseout", this.mouseLeave.bind(this));
         
@@ -217,11 +235,6 @@ Panorama.Element = Class.create({
     
     mouseLeave: function() {
         this.scrollAmount = this.parent.options.scrollSpeed;
-    },
-
-    mouseEnter: function() {
-        this.scrollAmount = 0;
-        this.target = this.scrollPosition;
     }
 });
 
