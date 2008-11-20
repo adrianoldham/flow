@@ -6,7 +6,7 @@ var FixedPanorama = Class.create({
         // if auto play is off, make sure panorama doesn't change
         if (!this.options.autoPlay) {
             this.options.scrollSpeed = 0;
-            this.options.useMouseStop = false;
+            this.options.showPauseIndicator = false;
         }
         
         // sets auto play delay
@@ -19,7 +19,7 @@ var FixedPanorama = Class.create({
         this.panoramaContainer = $(panoramaContainer);
         this.anchors = $$(selector);        
         
-        if (this.anchors.length == 1) this.options.useMouseStop = false;
+        if (this.anchors.length == 1) this.options.showPauseIndicator = false;
         
         // die gracefully for any of these conditions
         if (this.container == null ||

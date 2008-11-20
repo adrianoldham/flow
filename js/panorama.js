@@ -102,7 +102,7 @@ var Panorama = Class.create({
         clearTimeout(this.currentElement.hider);
         this.currentElement.checkOverflow = true;
         
-        this.pauseDiv.show();
+        if (this.options.showPauseIndicator) this.pauseDiv.show();
     }
 });
 
@@ -261,5 +261,6 @@ Panorama.DefaultOptions = {
     scrollCatchUp: 20,
     pausedClass: 'paused',
     pausedText: 'Paused',
+    showPauseIndicator: true,
     onChange: function() {}
 };
