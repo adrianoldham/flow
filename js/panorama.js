@@ -35,10 +35,16 @@ var Panorama = Class.create({
     
     set: function(index) {
         var element = this.elements[index];
+        
         if (element != this.currentElement) {
             this.previousElement = this.currentElement;
             this.currentElement.checkOverflow = true;
             this.currentElement.hide(element);
+            
+            if (this.paused) {
+                this.previousElement.scroller.stop();
+                this.mouseEnter();
+            }
         }
     },
     
@@ -58,9 +64,11 @@ var Panorama = Class.create({
             this.container.observe("mouseout", this.mouseLeave.bind(this)); 
             
             // add pause notifier only if mouse stop is on        
-            this.pauseDiv = new Element("div", { 'class': this.options.pausedClass }).update(this.options.pausedText);
-            this.container.appendChild(this.pauseDiv);
-            this.pauseDiv.hide();
+            if (this.options.showPauseIndicator) {
+                this.pauseDiv = new Element("div", { 'class': this.options.pausedClass }).update(this.options.pausedText);
+                this.container.appendChild(this.pauseDiv);
+                this.pauseDiv.hide();
+            }
         }
     },
     
@@ -92,7 +100,8 @@ var Panorama = Class.create({
             this.currentElement.hideDelay = true;
         }
         
-        this.pauseDiv.hide();
+        this.paused = false;
+        if (this.pauseDiv) this.pauseDiv.hide();
     },
     
     mouseEnter: function() {
@@ -102,7 +111,8 @@ var Panorama = Class.create({
         clearTimeout(this.currentElement.hider);
         this.currentElement.checkOverflow = true;
         
-        if (this.options.showPauseIndicator) this.pauseDiv.show();
+        if (this.pauseDiv) this.pauseDiv.show();
+        this.paused = true;
     }
 });
 
