@@ -103,6 +103,16 @@
         img.focused, .focused img {
 			border: 5px solid black;
         }
+
+		.paused {
+			background-color: white;
+			padding: 5px;
+			position: absolute;
+			bottom: 15px;
+			right: 15px;
+			line-height: 0.8em;
+			z-index: 101;
+		}		
     </style>
 </head>
 <body>
@@ -135,13 +145,16 @@
                 centerFocus: false,
                 scrollCatchUp: 5,
 				autoHideScrollBar: true,
-				autoScrollDelay: 100,
 			    enableClickEvents: false,
 				keyScrollType: 'per-item-and-focus',
                 stacker: Flow.Stackers.normal, // stacker needs centerFocus on to work as desired
                                                 // NOTE: try Flow.Stackers.coverflow for a different stacker (or Flow.Stackers.normal)
                 scaler: Flow.Scalers.normal  // scaler needs centerFocus on to work as desired
-            });
+            }, {
+				autoPlay: true,
+				autoPlayDelay: 2000,
+				usePauseIndicator: true
+			});
         }
         
         Event.observe(window, "load", runTest);
