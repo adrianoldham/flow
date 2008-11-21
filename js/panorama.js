@@ -36,15 +36,15 @@ var Panorama = Class.create({
     set: function(index) {
         var element = this.elements[index];
         
-        if (element != this.currentElement) {
+        if (element != this.currentElement) {            
             this.previousElement = this.currentElement;
             this.currentElement.checkOverflow = true;
             this.currentElement.hide(element);
-            
+
             if (this.paused) {
-                this.previousElement.scroller.stop();
                 this.mouseEnter();
             }
+
         }
     },
     
@@ -93,15 +93,14 @@ var Panorama = Class.create({
     },
     
     mouseLeave: function() {
-        if (this.currentElement.hideDelay) {
-            this.currentElement.hider = setTimeout(this.currentElement.hide.bind(this.currentElement, null), this.options.minDelay);
-        
-            this.currentElement.checkOverflow = false;    
-            this.currentElement.hideDelay = true;
-        }
-        
+        this.currentElement.startTime = (new Date()).getTime();
+        if (this.currentElement.scroller) this.currentElement.scroller.stop();
+        this.currentElement.scroller = new PeriodicalExecuter(this.currentElement.update.bind(this.currentElement), this.options.updateDelay);
+
         this.paused = false;
         if (this.pauseDiv) this.pauseDiv.hide();
+
+        this.currentElement.checkOverflow = true;
     },
     
     mouseEnter: function() {
@@ -189,6 +188,8 @@ Panorama.Element = Class.create({
     },
     
     update: function() {        
+	if (this.parent.paused)  return;
+
         this.scrollPosition += (this.target - this.scrollPosition) / this.parent.options.scrollCatchUp;        
         this.target -= this.scrollAmount;
         
