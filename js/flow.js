@@ -921,7 +921,7 @@ Flow.DefaultOptions = {
     centerFocus: false,
     focusOnClick: true,
     autoScroll: true,
-    autoScrollDelay: 2,
+    autoScrollDelay: 5,
     autoHideScrollBar: true,
     centerAtStart: false,
     mouseScrollSensitivity: 0.04,

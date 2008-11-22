@@ -261,8 +261,8 @@ Panorama.Element = Class.create({
 Panorama.DefaultOptions = {
     minDelay: 5000,
     maxMouseScrollSpeed: 3,
-    useMouseScroll: true,
-    useMouseStop: true,
+    useMouseScroll: false,
+    useMouseStop: false,
     zIndex: 100,
     scrollSpeed: 1,
     updateDelay: 0.05,
