@@ -109,6 +109,7 @@ var Panorama = Class.create({
         
         clearTimeout(this.currentElement.hider);
         this.currentElement.checkOverflow = true;
+        this.currentElement.scrollAmount = 0;
         
         if (this.pauseDiv) this.pauseDiv.show();
         this.paused = true;
@@ -188,8 +189,6 @@ Panorama.Element = Class.create({
     },
     
     update: function() {        
-	if (this.parent.paused)  return;
-
         this.scrollPosition += (this.target - this.scrollPosition) / this.parent.options.scrollCatchUp;        
         this.target -= this.scrollAmount;
         
@@ -200,6 +199,8 @@ Panorama.Element = Class.create({
             if (this.scrollPosition < -this.size[Panorama.ATTRIBUTE[this.direction]] +
                 this.parent.size[Panorama.ATTRIBUTE[this.direction]] +
                 this.pixelsPerSecond) {
+                    
+                if (this.parent.paused) return;
                     
                 this.endTime = (new Date()).getTime();
                 this.timeUsed = this.endTime - this.startTime;
