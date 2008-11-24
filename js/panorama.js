@@ -93,6 +93,8 @@ var Panorama = Class.create({
     },
     
     mouseLeave: function() {
+        if (this.currentElement == null) return;
+        
         this.currentElement.startTime = (new Date()).getTime();
         if (this.currentElement.scroller) this.currentElement.scroller.stop();
         this.currentElement.scroller = new PeriodicalExecuter(this.currentElement.update.bind(this.currentElement), this.options.updateDelay);
@@ -104,6 +106,8 @@ var Panorama = Class.create({
     },
     
     mouseEnter: function() {
+        if (this.currentElement == null) return;
+                
         this.currentElement.scrollAmount = 0;
         this.currentElement.target = this.currentElement.scrollPosition;
         
