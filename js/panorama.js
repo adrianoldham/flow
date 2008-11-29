@@ -11,7 +11,7 @@ var Panorama = Class.create({
         
         if (this.images.length == 0) return;
         
-        this.setupContainer();        
+        this.setupContainer();
         this.preloadImages();
     },
     
@@ -228,6 +228,8 @@ Panorama.Element = Class.create({
     },
     
     hide: function(elementToShow) {
+        this.parent.options.onHide();
+        
         this.parent.elements.each(function(sibling) {
             sibling.element.setStyle({ zIndex: this.parent.options.zIndex - 2 });
         }.bind(this));
@@ -278,5 +280,6 @@ Panorama.DefaultOptions = {
     pausedClass: 'paused',
     pausedText: 'Paused',
     showPauseIndicator: true,
+    onHide: function() {},
     onChange: function() {}
 };
