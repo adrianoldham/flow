@@ -129,7 +129,7 @@ Object.extend(Panorama, {
 
 Panorama.Element = Class.create({
     initialize: function(element, parent) {
-        this.element = element;
+        this.element = $(element);
         this.parent = parent;
         
         this.setup();
