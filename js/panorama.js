@@ -183,6 +183,7 @@ Panorama.Element = Class.create({
         });
         
         this.parent.options.onChange();
+        this.parent.options.onShow();
         
         if (this.scroller) this.scroller.stop();
         this.scroller = new PeriodicalExecuter(this.update.bind(this), this.parent.options.updateDelay);
@@ -281,5 +282,6 @@ Panorama.DefaultOptions = {
     pausedText: 'Paused',
     showPauseIndicator: true,
     onHide: function() {},
-    onChange: function() {}
+    onChange: function() {},
+    onShow: function() {}
 };
