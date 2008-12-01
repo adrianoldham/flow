@@ -50,6 +50,7 @@ var FlowingPanorama = Class.create({
         this.anchors.each(function(anchor) {
             var image = $(new Image());
             image.src = anchor.href;
+            image.id = anchor.id + "__image";
             
             this.images.push(image);
         }.bind(this));
