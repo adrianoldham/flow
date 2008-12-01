@@ -93,6 +93,9 @@ var Panorama = Class.create({
     },
     
     mouseLeave: function() {
+        // if the pause is done externally then don't unpause until externally unpaused
+        if (this.outsidePause) return;
+        
         if (this.currentElement == null) return;
         
         this.currentElement.startTime = (new Date()).getTime();
@@ -117,6 +120,18 @@ var Panorama = Class.create({
         
         if (this.pauseDiv) this.pauseDiv.show();
         this.paused = true;
+    },
+    
+    // external pause
+    pause: function() {
+        this.outsidePause = true;
+        this.mouseEnter();
+    },
+    
+    // external unpause
+    unPause: function() {
+        this.outsidePause = false;
+        this.mouseLeave();
     }
 });
 
