@@ -36,7 +36,13 @@ var Panorama = Class.create({
     set: function(index) {
         var element = this.elements[index];
         
-        if (element != this.currentElement) {            
+        if (element != this.currentElement) {        
+            if (this.outsidePause) {
+                this.outsidePause = false;
+                this.mouseLeave();
+                this.outsidePause = true;
+            }
+                
             this.previousElement = this.currentElement;
             this.currentElement.checkOverflow = true;
             this.currentElement.hide(element);
