@@ -37,11 +37,6 @@ var Panorama = Class.create({
         var element = this.elements[index];
         
         if (element != this.currentElement) {        
-            if (this.outsidePause) {
-                this.unPause();
-                this.pause();
-            }
-                
             this.previousElement = this.currentElement;
             this.currentElement.checkOverflow = true;
             this.currentElement.hide(element);
@@ -98,30 +93,25 @@ var Panorama = Class.create({
     },
     
     mouseLeave: function() {
-        // if the pause is done externally then don't unpause until externally unpaused
         if (this.outsidePause) return;
         
         if (this.currentElement == null) return;
         
         this.currentElement.startTime = (new Date()).getTime();
-        if (this.currentElement.scroller) this.currentElement.scroller.stop();
-        this.currentElement.scroller = new PeriodicalExecuter(this.currentElement.update.bind(this.currentElement), this.options.updateDelay);
-
-        this.paused = false;
-        if (this.pauseDiv) this.pauseDiv.hide();
-
         this.currentElement.checkOverflow = true;
+
+        if (this.pauseDiv) this.pauseDiv.hide();
+        this.paused = false;
     },
     
     mouseEnter: function() {
         if (this.currentElement == null) return;
-                
-        this.currentElement.scrollAmount = 0;
-        this.currentElement.target = this.currentElement.scrollPosition;
         
-        clearTimeout(this.currentElement.hider);
-        this.currentElement.checkOverflow = true;
-        this.currentElement.scrollAmount = 0;
+        if (this.currentElement.hideDelay) {
+            clearTimeout(this.currentElement.hider);
+            this.currentElement.hideDelay = false;
+            this.currentElement.checkOverflow = true;
+        }
         
         if (this.pauseDiv) this.pauseDiv.show();
         this.paused = true;
@@ -213,19 +203,24 @@ Panorama.Element = Class.create({
         this.hideDelay = false;
     },
     
-    update: function() {        
+    update: function() {
+        if (this.hideDelay) return;
+        
+        if (this.parent.paused) {
+            this.scrollAmount = 0;
+            this.target = this.scrollPosition;
+        }
+        
         this.scrollPosition += (this.target - this.scrollPosition) / this.parent.options.scrollCatchUp;        
         this.target -= this.scrollAmount;
         
         if (this.target > 0) this.target = 0;
         
-        if (this.checkOverflow) {
+        if (this.checkOverflow && !this.parent.paused) {
             this.pixelsPerSecond = (1 / this.parent.options.updateDelay) * this.scrollAmount;
             if (this.scrollPosition < -this.size[Panorama.ATTRIBUTE[this.direction]] +
                 this.parent.size[Panorama.ATTRIBUTE[this.direction]] +
                 this.pixelsPerSecond) {
-                    
-                if (this.parent.paused) return;
                     
                 this.endTime = (new Date()).getTime();
                 this.timeUsed = this.endTime - this.startTime;
@@ -233,9 +228,7 @@ Panorama.Element = Class.create({
                 
                 if (this.timeLeft > 0) {
                     this.hider = setTimeout(this.hide.bind(this, null), this.timeLeft);
-                    this.checkOverflow = false;
-                    this.scroller.stop();
-                    
+                    this.checkOverflow = false;                    
                     this.hideDelay = true;
                 } else {
                     this.hide();    
