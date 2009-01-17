@@ -195,7 +195,7 @@ Panorama.Element = Class.create({
         this.parent.options.onChange();
         
         if (!this.parent.currentElement.element.complete) {
-            this.parent.currentElement.element.complete.observe('load', 
+            this.parent.currentElement.element.observe('load', 
                 function() { this.parent.options.onShow(); }.bind(this)
             );
         } else {
