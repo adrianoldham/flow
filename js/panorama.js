@@ -193,7 +193,14 @@ Panorama.Element = Class.create({
         });
         
         this.parent.options.onChange();
-        this.parent.options.onShow();
+        
+        if (!this.parent.currentElement.element.complete) {
+            this.parent.currentElement.element.complete.observe('load', 
+                function() { this.parent.options.onShow(); }.bind(this)
+            );
+        } else {
+            this.parent.options.onShow();
+        }
         
         if (this.scroller) this.scroller.stop();
         this.scroller = new PeriodicalExecuter(this.update.bind(this), this.parent.options.updateDelay);
