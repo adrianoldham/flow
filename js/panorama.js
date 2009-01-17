@@ -7,7 +7,7 @@ var Panorama = Class.create({
         this.options = Object.extend(Object.extend({}, Panorama.DefaultOptions), options || {});
         
         if (typeof(images) == "string") images = $$(images);
-        this.images = images;
+        this.images = images || [];
         
         if (this.images.length == 0) return;
         
