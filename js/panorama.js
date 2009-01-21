@@ -186,21 +186,17 @@ Panorama.Element = Class.create({
         
         if (this.effect) this.effect.cancel();
         this.effect = new Effect.Appear(this.element, { afterFinish: function() {
-            if (this.parent.previousElement && this.parent.previousElement.scroller) this.parent.previousElement.scroller.stop();
-            this.parent.previousElement = this;
-             }.bind(this),
+                if (this.parent.previousElement && this.parent.previousElement.scroller) this.parent.previousElement.scroller.stop();
+                this.parent.previousElement = this;
+
+                // do on show AFTER fading is done
+                if (this.parent.options.callOnShowAfterFade) this.doOnShow();
+            }.bind(this),
             duration: this.parent.options.transitionSpeed
         });
         
         this.parent.options.onChange();
-        
-        if (!this.parent.currentElement.element.complete) {
-            this.parent.currentElement.element.observe('load', 
-                function() { this.parent.options.onShow(); }.bind(this)
-            );
-        } else {
-            this.parent.options.onShow();
-        }
+        if (!this.parent.options.callOnShowAfterFade) this.doOnShow();
         
         if (this.scroller) this.scroller.stop();
         this.scroller = new PeriodicalExecuter(this.update.bind(this), this.parent.options.updateDelay);
@@ -208,6 +204,16 @@ Panorama.Element = Class.create({
         this.startTime = (new Date()).getTime();
 
         this.hideDelay = false;
+    },
+    
+    doOnShow: function() {  
+      if (!this.parent.currentElement.element.complete) {
+          this.parent.currentElement.element.observe('load', 
+              function() { this.parent.options.onShow(); }.bind(this)
+          );
+      } else {
+          this.parent.options.onShow();
+      }
     },
     
     update: function() {
@@ -301,6 +307,7 @@ Panorama.DefaultOptions = {
     pausedClass: 'paused',
     pausedText: 'Paused',
     showPauseIndicator: true,
+    callOnShowAfterFade: true,
     onHide: function() {},
     onChange: function() {},
     onShow: function() {}
