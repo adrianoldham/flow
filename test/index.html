@@ -11,6 +11,7 @@
     <script type="text/javascript" charset="utf-8" src="../js/flow.js"></script>
     <script type="text/javascript" charset="utf-8" src="../js/panorama.js"></script>
     <script type="text/javascript" charset="utf-8" src="../js/flowing_panorama.js"></script>
+    <script type="text/javascript" charset="utf-8" src="../js/lazyloader.js"></script>
     
     <style type="text/css" media="screen">
         body {
@@ -139,6 +140,8 @@
     
     <script type="text/javascript" charset="utf-8">
         function runTest() {
+			var lazy = new LazyLoader($('flow').select('.container')[0]);
+	
             var flowingPanorama = new FlowingPanorama("flow", "panorama", "#flow a", {
                 overrideSelector: "#flow a",  // we want flow to grab the actual images (since we're scaling)
                 verticalAlignment: "middle",    // try top, middle or bottom
@@ -149,7 +152,8 @@
 				keyScrollType: 'per-item-and-focus',
                 stacker: Flow.Stackers.normal, // stacker needs centerFocus on to work as desired
                                                 // NOTE: try Flow.Stackers.coverflow for a different stacker (or Flow.Stackers.normal)
-                scaler: Flow.Scalers.normal  // scaler needs centerFocus on to work as desired
+                scaler: Flow.Scalers.normal,  // scaler needs centerFocus on to work as desired
+				lazyLoader: lazy
             }, {
 				autoPlay: true,
 				autoPlayDelay: 5000,

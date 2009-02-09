@@ -16,6 +16,10 @@ var Flow = Class.create({
         
         this.getPosition();
         
+        // setup the lazy load, only works if sequence is created on dom:loaded
+        // use lazy loader to load images only if specified in the options
+        this.setupLazyLoader();
+        
         this.setupContainer();
         this.setupElements($$(selector));
         this.setupPageButtons();
@@ -23,6 +27,40 @@ var Flow = Class.create({
         this.setupStartingPosition();
         this.setupUpdater();        
         this.setupAutoScroll();
+        
+        // show any images that are visible on load
+        this.setLazyLoaderThreshold();
+    },
+    
+    setLazyLoaderThreshold: function() {
+        if (this.lazyLoader && this.lazyLoader.container != null) {        
+            var threshold;
+        
+            // find the threshold in pixels based on lazy load type
+            switch (this.options.lazyLoadType) {
+                case "page":
+                    threshold = this.options.lazyLoadThreshold * this.size.x;
+                    break;
+                case "item":
+                    threshold = this.options.lazyLoadThreshold * this.biggestElement.original.size.x;
+                    break;
+            }
+        
+            this.lazyLoader.setThreshold(threshold);
+        }
+    },
+    
+    updateLazyLoader: function() {
+        if (this.lazyLoader && this.lazyLoader.container != null) {
+            this.lazyLoader.update();
+
+        }
+    },
+    
+    setupLazyLoader: function() {
+        if (this.options.lazyLoader) {
+            this.lazyLoader = this.options.lazyLoader;
+        }
     },
     
     getPosition: function() {
@@ -521,6 +559,7 @@ var Flow = Class.create({
         if (!this.isScrolling()) {
             if (this.updater) {this.updater.stop();}
             this.updater = null;
+            this.updateLazyLoader();
         }
     },
     
@@ -933,5 +972,11 @@ Flow.DefaultOptions = {
     keyScrollLoop: true,        // scrolling via keys is wrapped if true
     hideScrollbarDelay: 1000,
     enableClickEvents: false,
-    onFocus: function() {}
+    onFocus: function() {},
+    
+    // Lazy Loader options
+    
+    lazyLoader: null,
+    lazyLoadType: "item",                           // page or item
+    lazyLoadThreshold: 1                            // the amount of look ahead based on the above type
 };
