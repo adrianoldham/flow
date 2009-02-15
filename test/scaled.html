@@ -9,8 +9,6 @@
     <script type="text/javascript" charset="utf-8" src="../lib/scriptaculous.js?load=effects"></script>
     <script type="text/javascript" charset="utf-8" src="../js/helper.js"></script>
     <script type="text/javascript" charset="utf-8" src="../js/flow.js"></script>
-    <script type="text/javascript" charset="utf-8" src="../js/panorama.js"></script>
-    <script type="text/javascript" charset="utf-8" src="../js/flowing_panorama.js"></script>
     <script type="text/javascript" charset="utf-8" src="../js/lazyloader.js"></script>
     
     <style type="text/css" media="screen">
@@ -19,35 +17,20 @@
             text-align: center;
         }
 
-        #wrapper {
-            margin: 0 auto;
-            width: 900px;
-            margin-top: 25px;
-            padding: 25px 0 0 0;
-            background-color: #141414;
-            border: 1px solid #222;
-        }
-        #panorama {
-            width: 850px;
-            height: 234px;
-            overflow: hidden;
-            margin: 0 25px;
-        }
-
         #flow {
             padding: 0;
-            margin: 0 auto;
             position: relative;
             width: 900px;
-            height: 165px;
-            background: transparent url(images/bg.gif) repeat-x 50% -76px;
+            height: 300px;
+            margin: 20px auto;
+            background: transparent url(images/bg.gif) repeat-x 50% 50%;
         }
         
         #flow ul.container {
-            width: 850px;
-            height: 160px;
+            width: 900px;
+            height: 300px;
             overflow: hidden;
-            margin: 0 0 0 25px;
+            margin: 0;
             padding: 0;
         }
 
@@ -59,13 +42,10 @@
         }
 
         #flow li img {
-            width: 100px;
-            height: 100px;
-            margin: 25px 25px 0 0;
             border-bottom: 5px solid transparent;
         }
 
-        #flow li .focused img {
+        #flow li img.focused {
             border-color: #f03;
         }
 
@@ -82,7 +62,7 @@
             height: 19px;
         	position: absolute;
         	left: 50px;
-            bottom: 10px;
+            bottom: 20px;
             background: transparent url(images/scrollbar.png) no-repeat 50% 50%;
         }
 
@@ -98,7 +78,7 @@
             width: 30px;
             height: 30px;
             position: absolute;        
-            top: 58px;
+            top: 135px;
             cursor: pointer;
         }
 
@@ -128,51 +108,41 @@
     </style>
 </head>
 <body>
-  <div id="wrapper">
-    <div id="panorama">
-    </div>
     <div id="flow">
         <ul class="container">
-            <li class="first"><a href="images/pano2.jpg"><img src="images/thumb2.jpg"/></a></li>
-            <li><a href="images/pano1.jpg"><img src="images/thumb1.jpg" /></a></li>
-            <li><a href="images/pano2.jpg"><img src="images/thumb2.jpg" /></a></li>
-            <li><a href="images/pano1.jpg"><img src="images/thumb1.jpg" /></a></li>
-            <li><a href="images/pano2.jpg"><img src="images/thumb2.jpg" /></a></li>
-            <li><a href="images/pano1.jpg"><img src="images/thumb1.jpg" /></a></li>
-            <li><a href="images/pano2.jpg"><img src="images/thumb2.jpg" /></a></li>
-            <li><a href="images/pano1.jpg"><img src="images/thumb1.jpg" /></a></li>
-            <li><a href="images/pano2.jpg"><img src="images/thumb2.jpg" /></a></li>
-            <li><a href="images/pano1.jpg"><img src="images/thumb1.jpg" /></a></li>
-            <li><a href="images/pano2.jpg"><img src="images/thumb2.jpg" /></a></li>
-            <li><a href="images/pano1.jpg"><img src="images/thumb1.jpg" /></a></li>
-            <li class="last"><a href="images/pano2.jpg"><img src="images/thumb2.jpg"/></a></li>
+            <li class="first"><img src="images/cover1.jpg"/></li>
+            <li><img src="images/cover2.jpg"/></li>
+            <li><img src="images/cover3.jpg"/></li>
+            <li><img src="images/cover4.jpg"/></li>
+            <li><img src="images/cover5.jpg"/></li>
+            <li><img src="images/cover1.jpg"/></li>
+            <li><img src="images/cover2.jpg"/></li>
+            <li><img src="images/cover3.jpg"/></li>
+            <li><img src="images/cover4.jpg"/></li>
+            <li><img src="images/cover5.jpg"/></li>
+            <li><img src="images/cover1.jpg"/></li>
+            <li><img src="images/cover2.jpg"/></li>
+            <li class="last"><img src="images/cover3.jpg"/></li>
         </ul>
     </div>
-  </div>
     
     <script type="text/javascript" charset="utf-8">
         function runTest() {
-			var lazy = new LazyLoader($('flow').select('.container')[0]);
+			//var lazy = new LazyLoader($('flow').select('.container')[0]);
 	
-            var flowingPanorama = new FlowingPanorama("flow", "panorama", "#flow a", {
-                //overrideSelector: "#flow img",  // we want flow to grab the actual images (since we're scaling)
-                verticalAlignment: "top",    // try top, middle or bottom
-                centerFocus: false,
+            var flow = new Flow("flow", "#flow li", {
+                overrideSelector: "#flow img",  // we want flow to grab the actual images (since we're scaling)
+                verticalAlignment: "middle",    // try top, middle or bottom
+                centerFocus: true,
                 scrollCatchUp: 5,
 				autoHideScrollBar: true,
 			    enableClickEvents: false,
 				keyScrollType: 'per-item-and-focus',
-                stacker: Flow.Stackers.normal, // stacker needs centerFocus on to work as desired
-                                                // NOTE: try Flow.Stackers.coverflow for a different stacker (or Flow.Stackers.normal)
-                scaler: Flow.Scalers.normal,  // scaler needs centerFocus on to work as desired
-				lazyLoader: lazy
-            }, {
-				autoPlay: true,
-				autoPlayDelay: 5000,
-				usePauseIndicator: true,
-				useMouseScroll: true,
-				useMouseStop: true
-			});
+                stacker: Flow.Stackers.coverflow,   // stacker needs centerFocus on to work as desired
+                                                    // NOTE: try Flow.Stackers.coverflow for a different stacker (or Flow.Stackers.normal)
+                scaler: Flow.Scalers.coverflow//,   // scaler needs centerFocus on to work as desired
+                //lazyLoader: lazy
+            });
         }
         
         Event.observe(window, "load", runTest);
