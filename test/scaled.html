@@ -130,7 +130,7 @@
     
     <script type="text/javascript" charset="utf-8">
         function runTest() {
-			//var lazy = new LazyLoader($('flow').select('.container')[0]);
+			var lazy = new LazyLoader($('flow').select('.container')[0]);
 	
             var flow = new Flow("flow", "#flow li", {
                 overrideSelector: "#flow img",  // we want flow to grab the actual images (since we're scaling)
@@ -142,8 +142,8 @@
 				keyScrollType: 'per-item-and-focus',
                 stacker: Flow.Stackers.coverflow,   // stacker needs centerFocus on to work as desired
                                                     // NOTE: try Flow.Stackers.coverflow for a different stacker (or Flow.Stackers.normal)
-                scaler: Flow.Scalers.coverflow//,   // scaler needs centerFocus on to work as desired
-                //lazyLoader: lazy
+                scaler: Flow.Scalers.coverflow,   // scaler needs centerFocus on to work as desired
+                lazyLoader: lazy
             });
         }
         
