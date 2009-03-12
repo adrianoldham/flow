@@ -175,6 +175,8 @@
 				useMouseScroll: true,
 				useMouseStop: true
 			});
+			
+			flowingPanorama.addFocusEvent(function() { console.log('Focus has been called'); })
         }
         
         Event.observe(window, "load", runTest);

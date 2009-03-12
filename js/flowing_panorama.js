@@ -56,5 +56,9 @@ var FlowingPanorama = Class.create({
         }.bind(this));
         
         return this.images;
+    },
+        
+    addFocusEvent: function(func) {
+        this.flow.addFocusEvent(func);
     }
 });

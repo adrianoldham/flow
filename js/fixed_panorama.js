@@ -34,6 +34,7 @@ var FixedPanorama = Class.create({
         $(document).observe("keydown", this.keyScroll.bindAsEventListener(this));
         
         // make sure first item is focused
+        this.focusEvents = [];
         this.focusOn(0);
     },
     
@@ -68,6 +69,11 @@ var FixedPanorama = Class.create({
         
         // save current index
         this.currentIndex = index;
+        
+        // Call any focus callbacks
+        this.focusEvents.each(function(func) {
+            func(element);
+        }.bind(this));
     },
     
     setPanoramaBasedOnAnchor: function(anchor) {
@@ -102,6 +108,10 @@ var FixedPanorama = Class.create({
         }.bind(this));
         
         return this.images;
+    },
+    
+    addFocusEvent: function(func) {
+        this.focusEvents.push(func);
     }
 });
 

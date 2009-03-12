@@ -63,6 +63,8 @@
             var fixedPanorama = new FixedPanorama("fixed", "panorama", "#fixed a", {
 				useMouseScroll: false
 			});
+			
+			fixedPanorama.addFocusEvent(function() { console.log('Focus has been called'); })
         }
         
         Event.observe(window, "load", runTest);

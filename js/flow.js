@@ -11,6 +11,9 @@ var Flow = Class.create({
         
         if ($$(selector).length == 0) return;
         
+        this.focusEvents = [];
+        this.addFocusEvent(this.options.onFocus);
+        
         this.offset = this.options.maxScrollVelocity;
         this.container = this.wrapper.getElementsBySelector("." + this.options.containerClass).first();
         
@@ -159,7 +162,11 @@ var Flow = Class.create({
             
             if (this.options.focusOnClick) {
                 element.observe("click", function(event) {
-                    this.options.onFocus(flowElement);
+                    // Call any focus callbacks                    
+                    this.focusEvents.each(function(func) {
+                        func(element);
+                    }.bind(this));
+                    
                     this.scrollToElement(flowElement);                
                     
                     if (!this.options.enableClickEvents) {
@@ -329,6 +336,12 @@ var Flow = Class.create({
         
         flowElement.element.classNames().add(this.options.focusedClass);
         flowElement.update();
+        
+        // Call any focus callbacks
+        this.focusEvents.each(function(func) {
+            if (this.options.onFocus == func) return;
+            func(element);
+        }.bind(this));    
     },
     
     autoScroll: function() {
@@ -370,9 +383,12 @@ var Flow = Class.create({
         }
     },
     
-    focusOnElement: function(element) {
-        this.options.onFocus(element);
+    focusOnElement: function(element) {    
         this.scrollToElement(element);
+    },
+    
+    addFocusEvent: function(func) {    
+        this.focusEvents.push(func);
     },
     
     focusOnPreviousElement: function() {
