@@ -163,9 +163,11 @@ var Flow = Class.create({
             if (this.options.focusOnClick) {
                 element.observe("click", function(event) {
                     // Call any focus callbacks                    
-                    this.focusEvents.each(function(func) {
-                        func(element);
-                    }.bind(this));
+                    if (this.focusEvents) {
+                        this.focusEvents.each(function(func) {
+                            func(element);
+                        }.bind(this));   
+                    }
                     
                     this.scrollToElement(flowElement);                
                     
@@ -338,10 +340,12 @@ var Flow = Class.create({
         flowElement.update();
         
         // Call any focus callbacks
-        this.focusEvents.each(function(func) {
-            if (this.options.onFocus == func) return;
-            func(element);
-        }.bind(this));    
+        if (this.focusEvents) {
+            this.focusEvents.each(function(func) {
+                if (this.options.onFocus == func) return;
+                func(element);
+            }.bind(this));    
+        }
     },
     
     autoScroll: function() {
@@ -388,7 +392,9 @@ var Flow = Class.create({
     },
     
     addFocusEvent: function(func) {    
-        this.focusEvents.push(func);
+        if (this.focusEvents) {
+            this.focusEvents.push(func);            
+        }
     },
     
     focusOnPreviousElement: function() {
