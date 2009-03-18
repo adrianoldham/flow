@@ -21,8 +21,14 @@ Element.addMethods({
             }
 
             element.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + element.src + "',sizingMethod='scale')";
-            element.style.width = element.width + "px";
-            element.style.height = element.height + "px";
+            
+            // Calculate padding to remove
+            var horizontalPadding = parseInt(element.getStyle('paddingLeft')) + parseInt(element.getStyle('paddingRight'));
+            var verticalPadding = parseInt(element.getStyle('paddingTop')) +  parseInt(element.getStyle('paddingBottom'));  
+            
+            // Remove the padding twice, since image includes it, and microsoft alpha load scales image into it
+            element.style.width = (element.width - 2 * horizontalPadding) + "px";
+            element.style.height = (element.height - 2 * verticalPadding) + "px";
             element.src = blankPixel || "/images/blank.gif";
         } else {
             var src = $(element).getStyle("backgroundImage");
