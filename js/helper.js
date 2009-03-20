@@ -51,3 +51,7 @@ Array.prototype.index = function(val) {
 
     return null;
 };
+
+Prototype.Browser.IE6 = Prototype.Browser.IE && (/MSIE (6\.)/.test(navigator.userAgent));
+
+Prototype.Browser.IE7 = Prototype.Browser.IE && (/MSIE (7\.)/.test(navigator.userAgent));
