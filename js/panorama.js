@@ -306,7 +306,7 @@ Panorama.Element = Class.create({
 });
 
 Panorama.DefaultOptions = {
-    random: true,
+    random: false,
     minDelay: 5000,
     maxMouseScrollSpeed: 3,
     useMouseScroll: false,
