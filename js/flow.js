@@ -33,6 +33,11 @@ var Flow = Class.create({
         
         // show any images that are visible on load
         this.setLazyLoaderThreshold();
+        
+        var firstElement = this.elements.first();
+        if (firstElement != null) {
+          this.scrollToElement(firstElement); 
+        }
     },
     
     setLazyLoaderThreshold: function() {
@@ -161,20 +166,24 @@ var Flow = Class.create({
             //flowElement.update();
             
             if (this.options.focusOnClick) {
-                element.observe("click", function(event) {
+                element.observe("click", function(event, flowElement) {
                     // Call any focus callbacks                    
-                    if (this.focusEvents) {
-                        this.focusEvents.each(function(func) {
-                            func(element);
-                        }.bind(this));   
-                    }
+
+                    /*if (this.focusEvents) {
+                      this.focusEvents.each(function(func) {
+                          func(this);
+                      }.bind(flowElement));
+                    }*/                    
                     
-                    this.scrollToElement(flowElement);                
-                    
+                    this.scrollToElement(flowElement);
+
                     if (!this.options.enableClickEvents) {
                         event.stop();
+                        return false;
                     }
-                }.bind(this));
+                    
+                    return true;
+                }.bindAsEventListener(this, flowElement));
             }
             
             this.elements.push(flowElement);
@@ -341,10 +350,9 @@ var Flow = Class.create({
         
         // Call any focus callbacks
         if (this.focusEvents) {
-            this.focusEvents.each(function(func) {
-                if (this.options.onFocus == func) return;
-                func(element);
-            }.bind(this));    
+            this.focusEvents.each(function(func, flowElement) {
+                func(flowElement);
+            }.bindAsEventListener(this, flowElement));    
         }
     },
     

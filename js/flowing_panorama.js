@@ -30,7 +30,9 @@ var FlowingPanorama = Class.create({
 
         this.flow = new Flow(this.flowContainer, selector, Object.extend(flowOptions || {}, {
             onFocus: function(element) {
-                this.panorama.set(this.flow.elements.index(element));
+                if (this.panorama != null) {
+                    this.panorama.set(this.flow.elements.index(element), true);   
+                }
             }.bind(this),
             autoScroll: false
         }));

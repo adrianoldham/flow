@@ -70,16 +70,16 @@ var FixedPanorama = Class.create({
         // save current index
         this.currentIndex = index;
         
-        // Call any focus callbacks
+        // Call any focus callbacks        
         if (this.focusEvents) {
-            this.focusEvents.each(function(func) {
-                func(element);
-            }.bind(this));   
+            this.focusEvents.each(function(func, anchor) {
+                func(anchor);
+            }.bindAsEventListener(this, this.anchors[index]));    
         }
     },
     
     setPanoramaBasedOnAnchor: function(anchor) {
-        this.panorama.set(this.anchors.indexOf(anchor));
+        this.panorama.set(this.anchors.indexOf(anchor), true);
     },
     
     setupPanorama: function() {
@@ -104,6 +104,7 @@ var FixedPanorama = Class.create({
             
             // setup anchor link
             anchor.observe('click', function(event, anchor) {
+                this.focusOn(this.anchors.indexOf(anchor));
                 this.setPanoramaBasedOnAnchor(anchor);
                 event.stop();
             }.bindAsEventListener(this, anchor));

@@ -33,13 +33,13 @@ var Panorama = Class.create({
         this.elements.first().show(true);
     },
     
-    set: function(index) {
+    set: function(index, dontCallOnChange) {
         var element = this.elements[index];
         
         if (element != this.currentElement) {        
             this.previousElement = this.currentElement;
             this.currentElement.checkOverflow = true;
-            this.currentElement.hide(element);
+            this.currentElement.hide(element, dontCallOnChange);
 
             if (this.paused) {
                 this.mouseEnter();
@@ -168,7 +168,7 @@ Panorama.Element = Class.create({
         this.scrollAmount = this.parent.options.scrollSpeed;
     },
     
-    show: function(showFirst) {
+    show: function(showFirst, dontCallOnChange) {
         if (this.parent.currentElement) clearTimeout(this.parent.currentElement.hider);
         this.parent.currentElement = this;
         
@@ -195,7 +195,10 @@ Panorama.Element = Class.create({
             duration: this.parent.options.transitionSpeed
         });
         
-        this.parent.options.onChange();
+        if (!dontCallOnChange) {
+            this.parent.options.onChange();   
+        }
+        
         if (!this.parent.options.callOnShowAfterFade) this.doOnShow();
         
         if (this.scroller) this.scroller.stop();
@@ -254,7 +257,7 @@ Panorama.Element = Class.create({
         this.element.style[this.direction] = this.scrollPosition + "px";
     },
     
-    hide: function(elementToShow) {
+    hide: function(elementToShow, dontCallOnChange) {
         this.parent.options.onHide();
         
         this.parent.elements.each(function(sibling) {
@@ -262,11 +265,21 @@ Panorama.Element = Class.create({
         }.bind(this));
         
         this.element.setStyle({ zIndex: this.parent.options.zIndex - 1 });
-        element = elementToShow || this.next;
         
-        if (element == this) return;
+        var element;
+        if (this.parent.options.random && elementToShow == null) {
+            while (true) {
+                var index = parseInt(Math.random() * this.parent.elements.length);
+                element = this.parent.elements[index];   
+                
+                if (element != this) break;
+            }
+        } else {
+            element = elementToShow || this.next;
+            if (element == this) return;
+        }
         
-        element.show();
+        element.show(false, dontCallOnChange);
         
         this.checkOverflow = false;
     },
@@ -293,6 +306,7 @@ Panorama.Element = Class.create({
 });
 
 Panorama.DefaultOptions = {
+    random: true,
     minDelay: 5000,
     maxMouseScrollSpeed: 3,
     useMouseScroll: false,
