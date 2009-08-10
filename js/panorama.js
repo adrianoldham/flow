@@ -11,6 +11,12 @@ var Panorama = Class.create({
         
         if (this.images.length == 0) return;
         
+        if (this.options.random) {
+            this.startIndex = parseInt(Math.random() * this.images.length);
+        } else {
+            this.startIndex = 0;
+        }
+        
         this.setupContainer();
         this.preloadImages();
     },
@@ -30,12 +36,7 @@ var Panorama = Class.create({
     },
     
     start: function() {
-        if (this.options.random) {
-            var index = parseInt(Math.random() * this.elements.length);
-            this.elements[index].show(true);
-        } else {
-            this.elements.first().show(true);   
-        }
+        this.elements[this.startIndex].show(true);
     },
     
     set: function(index, dontCallOnChange) {
@@ -158,7 +159,7 @@ Panorama.Element = Class.create({
             zIndex: this.parent.options.zIndex - 1
         });
         
-        this.element.setOpacity(this.parent.elements.length == 0 ? 1 : 0);
+        this.element.setOpacity(this.parent.elements.length == this.parent.startIndex ? 1 : 0);
         
         if (this.element.parentNode == null) this.parent.container.appendChild(this.element);
         this.size = { x: this.element.getWidth(), y: this.element.getHeight() };        
