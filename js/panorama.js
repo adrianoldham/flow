@@ -30,7 +30,12 @@ var Panorama = Class.create({
     },
     
     start: function() {
-        this.elements.first().show(true);
+        if (this.options.random) {
+            var index = parseInt(Math.random() * this.elements.length);
+            this.elements[index].show(true);
+        } else {
+            this.elements.first().show(true);   
+        }
     },
     
     set: function(index, dontCallOnChange) {
@@ -196,7 +201,7 @@ Panorama.Element = Class.create({
         });
         
         if (!dontCallOnChange) {
-            this.parent.options.onChange();   
+            this.parent.options.onChange(this);   
         }
         
         if (!this.parent.options.callOnShowAfterFade) this.doOnShow();

@@ -33,10 +33,13 @@ var Flow = Class.create({
         
         // show any images that are visible on load
         this.setLazyLoaderThreshold();
-        
-        var firstElement = this.elements.first();
-        if (firstElement != null) {
-          this.scrollToElement(firstElement); 
+
+        // If option says to focus on load, then we load the first element
+        if (this.options.focusOnLoad) {
+            var firstElement = this.elements.first();
+            if (firstElement != null) {
+              this.scrollToElement(firstElement); 
+            }
         }
     },
     
@@ -967,6 +970,7 @@ Flow.Scalers = {
 };
 
 Flow.DefaultOptions = {
+    focusOnLoad: true,
     useIphoneOverflow: false,
     zIndex: [100, 500],                     // range of the zIndex value for the images (the bigger the range, the more accurate the layering)
     stacker: Flow.Stackers.normal,

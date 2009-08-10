@@ -28,6 +28,9 @@ var FlowingPanorama = Class.create({
         if (this.anchors.length == 0) return;
         if (this.anchors.length <= 1) panoramaOptions.showPauseIndicator = false;
 
+        // Need to turn focus on load off as panorama deals with that already
+        flowOptions.focusOnLoad = false;
+
         this.flow = new Flow(this.flowContainer, selector, Object.extend(flowOptions || {}, {
             onFocus: function(element) {
                 if (this.panorama != null) {
@@ -38,9 +41,9 @@ var FlowingPanorama = Class.create({
         }));
                 
         this.panorama = new Panorama(this.panoramaContainer, this.createImages(), Object.extend(panoramaOptions || {},{
-            onChange: function() {
-                if (this.panorama && !this.flow.isScrolling()) {
-                    this.flow.scrollToIndex(this.panorama.currentIndex(), true);
+            onChange: function(element) {
+                if (element.parent && !this.flow.isScrolling()) {
+                    this.flow.scrollToIndex(element.parent.currentIndex(), true);
                 }
             }.bind(this)
         }));

@@ -35,7 +35,6 @@ var FixedPanorama = Class.create({
         
         // make sure first item is focused
         this.focusEvents = [];
-        this.focusOn(0);
     },
     
     clampIndex: function(index) {
@@ -85,8 +84,8 @@ var FixedPanorama = Class.create({
     setupPanorama: function() {
         this.panorama = new Panorama(this.panoramaContainer, this.images, Object.extend({
             // on panorama change then make sure the focus element is set
-            onChange: function() {
-                if (this.panorama) this.focusOn(this.panorama.currentIndex());
+            onChange: function(element) {
+                if (element.parent) this.focusOn(element.parent.currentIndex());
             }.bind(this)
         }, this.options));
     },
