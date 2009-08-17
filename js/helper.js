@@ -7,6 +7,8 @@ Element.addMethods({
     iePNGFix: function(element, blankPixel) {
         if (!isIE) return;
         
+        element = $(element);
+        
         if (element.complete != null) {
             if (element.src == blankPixel) return;        
             if (!PNG_FORMAT.test(element.src.toLowerCase())) return;
@@ -27,8 +29,12 @@ Element.addMethods({
             var verticalPadding = parseInt(element.getStyle('paddingTop')) +  parseInt(element.getStyle('paddingBottom'));  
             
             // Remove the padding twice, since image includes it, and microsoft alpha load scales image into it
-            element.style.width = (element.width - 2 * horizontalPadding) + "px";
-            element.style.height = (element.height - 2 * verticalPadding) + "px";
+            if (element.width - horizontalPadding >= 0)
+                element.style.width = (element.width - horizontalPadding) + "px";            
+
+            if (element.height - verticalPadding >= 0)                
+                element.style.height = (element.height - verticalPadding) + "px";
+            
             element.src = blankPixel || "/images/blank.gif";
         } else {
             var src = $(element).getStyle("backgroundImage");
