@@ -28,12 +28,12 @@ Element.addMethods({
             var horizontalPadding = parseInt(element.getStyle('paddingLeft')) + parseInt(element.getStyle('paddingRight'));
             var verticalPadding = parseInt(element.getStyle('paddingTop')) +  parseInt(element.getStyle('paddingBottom'));  
             
-            // Remove the padding twice, since image includes it, and microsoft alpha load scales image into it
-            if (element.width - horizontalPadding >= 0)
-                element.style.width = (element.width - horizontalPadding) + "px";            
+            if (isNaN(horizontalPadding)) horizontalPadding = 0;
+            if (isNaN(verticalPadding)) verticalPadding = 0;
 
-            if (element.height - verticalPadding >= 0)                
-                element.style.height = (element.height - verticalPadding) + "px";
+            // Remove the padding twice, since image includes it, and microsoft alpha load scales image into it
+            element.style.width = (element.width - horizontalPadding) + "px";       
+            element.style.height = (element.height - verticalPadding) + "px";
             
             element.src = blankPixel || "/images/blank.gif";
         } else {
