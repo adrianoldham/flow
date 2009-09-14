@@ -1,11 +1,18 @@
-// precheck if IE
-var isIE = (/MSIE (5\.5|6\.)/.test(navigator.userAgent) && navigator.platform == "Win32");
+// precheck if IE (depricated)
+var isIE = Prototype.Browser.IE && (/MSIE (5\.5|6\.)/.test(navigator.userAgent) && navigator.platform == "Win32");
 
+// browsers that don't support PNG Alpha and require iePNGFix
+var hasNoAlphaSupport = Prototype.Browser.IE && (/MSIE (5\.5|6\.)/.test(navigator.userAgent) && navigator.platform == "Win32");
+
+// browsers that don't properly support opacity animation for PNG Alpha 
+var hasNoAlphaAnimationSupport = Prototype.Browser.IE && (/MSIE (5\.5|6\.|7\.|8\.)/.test(navigator.userAgent) && navigator.platform == "Win32");
+
+// iePNGFix Alpha PNG images for IE 5.5 - 6.x
 var PNG_FORMAT = /^.+\.((png))$/;
 
 Element.addMethods({ 
     iePNGFix: function(element, blankPixel) {
-        if (!isIE) return;
+        if (!hasNoAlphaSupport) return;
         
         element = $(element);
         
@@ -58,6 +65,9 @@ Array.prototype.index = function(val) {
     return null;
 };
 
+// specific IE browser version detection
 Prototype.Browser.IE6 = Prototype.Browser.IE && (/MSIE (6\.)/.test(navigator.userAgent));
 
 Prototype.Browser.IE7 = Prototype.Browser.IE && (/MSIE (7\.)/.test(navigator.userAgent));
+
+Prototype.Browser.IE8 = Prototype.Browser.IE && (/MSIE (8\.)/.test(navigator.userAgent));

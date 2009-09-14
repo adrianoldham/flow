@@ -282,9 +282,7 @@ var Flow = Class.create({
             this.wrapper.appendChild(this.nextPageButton);
         }
         
-        var isIE = (/MSIE (5\.5|6\.)/.test(navigator.userAgent) && navigator.platform == "Win32");
-        
-        if (isIE) {
+        if (hasNoAlphaSupport) {
             this.previousDisableButton = new Element("div");
             //this.previousDisableButton.classNames().add(this.options.previousPageClass);
             this.previousDisableButton.classNames().add(this.options.previousDisabledClass);   
