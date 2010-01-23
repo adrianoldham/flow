@@ -48,11 +48,11 @@ var FixedPanorama = Class.create({
         switch (event.keyCode) {
             case FixedPanorama.Keys.ScrollUp:
                 var index = this.clampIndex(this.currentIndex - 1);
-                this.setPanoramaBasedOnAnchor(this.anchors[index]);
+                this.panorama.set(index, false);
                 break;
             case FixedPanorama.Keys.ScrollDown:
                 var index = this.clampIndex(this.currentIndex + 1);
-                this.setPanoramaBasedOnAnchor(this.anchors[index]);
+                this.panorama.set(index, false);
                 break;
         }
     },

@@ -64,7 +64,7 @@
 				useMouseScroll: false
 			});
 			
-			fixedPanorama.addFocusEvent(function() { console.log('Focus has been called'); })
+			fixedPanorama.addFocusEvent(function(e) { e.fire('overflow:click'); console.log(e) ; console.log('Focus has been called'); })
         }
         
         Event.observe(window, "load", runTest);
