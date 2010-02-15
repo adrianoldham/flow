@@ -175,7 +175,7 @@ Panorama.Element = Class.create({
     },
     
     show: function(showFirst, dontCallOnChange) {
-        if (this.parent.elements.size() <= 1) return;
+        if (this.parent.elements.size() <= 1) return false;
         
         if (this.parent.currentElement) clearTimeout(this.parent.currentElement.hider);
         this.parent.currentElement = this;
