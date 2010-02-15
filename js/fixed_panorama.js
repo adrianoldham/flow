@@ -17,7 +17,7 @@ var FixedPanorama = Class.create({
         // setup important elements
         this.container = $(container);
         this.panoramaContainer = $(panoramaContainer);
-        this.anchors = $$(selector);        
+        this.anchors = $$(selector);
         
         if (this.anchors.length <= 1) this.options.showPauseIndicator = false;
         
