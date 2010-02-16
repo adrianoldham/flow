@@ -50,7 +50,6 @@ var Panorama = Class.create({
             if (this.paused) {
                 this.mouseEnter();
             }
-
         }
     },
     
@@ -175,8 +174,6 @@ Panorama.Element = Class.create({
     },
     
     show: function(showFirst, dontCallOnChange) {
-        if (this.parent.elements.size() <= 1) return false;
-        
         if (this.parent.currentElement) clearTimeout(this.parent.currentElement.hider);
         this.parent.currentElement = this;
         
@@ -210,6 +207,9 @@ Panorama.Element = Class.create({
         if (!this.parent.options.callOnShowAfterFade) this.doOnShow();
         
         if (this.scroller) this.scroller.stop();
+        
+        if (this.parent.elements.size() <= 1) return false;
+        
         this.scroller = new PeriodicalExecuter(this.update.bind(this), this.parent.options.updateDelay);
         
         this.startTime = (new Date()).getTime();

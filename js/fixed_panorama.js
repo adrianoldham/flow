@@ -103,6 +103,7 @@ var FixedPanorama = Class.create({
             
             // setup anchor link
             anchor.observe('click', function(event, anchor) {
+                event.stop();
                 this.focusOn(this.anchors.indexOf(anchor));
                 this.setPanoramaBasedOnAnchor(anchor);
                 event.stop();
