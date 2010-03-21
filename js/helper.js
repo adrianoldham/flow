@@ -11,7 +11,7 @@ var hasNoAlphaAnimationSupport = Prototype.Browser.IE && (/MSIE (5\.5|6\.|7\.|8\
 var PNG_FORMAT = /^.+\.((png))$/;
 
 Element.addMethods({ 
-    iePNGFix: function(element, blankPixel) {
+    iePNGFix: function(element, blankPixel, sizingMethod) {
         if (!hasNoAlphaSupport) return;
         
         element = $(element);
@@ -51,7 +51,8 @@ Element.addMethods({
             src = src.substring(startIndex, length);
             if (!PNG_FORMAT.test(src.toLowerCase())) return;
 
-            element.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + src + "',sizingMethod='scale')";
+            var sizingMethod = sizingMethod || "scale";
+            element.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + src + "',sizingMethod='"+ sizingMethod + "')";
             element.setStyle({ background: "none" });
         }
     }
