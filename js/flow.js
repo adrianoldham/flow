@@ -282,7 +282,7 @@ var Flow = Class.create({
             this.wrapper.appendChild(this.nextPageButton);
         }
         
-        if (hasNoAlphaSupport) {
+        if (hasNoAlphaSupport && this.options.iePNGFix) {
             this.previousDisableButton = new Element("div");
             //this.previousDisableButton.classNames().add(this.options.previousPageClass);
             this.previousDisableButton.classNames().add(this.options.previousDisabledClass);   
@@ -291,7 +291,7 @@ var Flow = Class.create({
             this.previousDisableButton.style.display = "none";
             
             this.previousPageButton.insert({ after: this.previousDisableButton });
-            this.previousDisableButton.iePNGFix();
+            this.previousDisableButton.iePNGFix(this.options.iePNGFixBlankPixel,this.options.iePNGFixSizingMethod);
             
             this.nextDisableButton = new Element("div");
             //this.nextDisableButton.classNames().add(this.options.nextPageClass);
@@ -301,7 +301,7 @@ var Flow = Class.create({
             this.nextDisableButton.style.display = "none";
 
             this.nextPageButton.insert({ after: this.nextDisableButton });
-            this.nextDisableButton.iePNGFix();
+            this.nextDisableButton.iePNGFix(this.options.iePNGFixBlankPixel,this.options.iePNGFixSizingMethod);
         }
         
         if (this.noScroll) {
@@ -324,12 +324,12 @@ var Flow = Class.create({
         
         this.previousPageButton.style.zIndex = this.options.zIndex.last() + 1;
             
-        this.previousPageButton.iePNGFix();
+        this.previousPageButton.iePNGFix(this.options.iePNGFixBlankPixel,this.options.iePNGFixSizingMethod);
         this.previousPageButton.observe("click", previousFunction);
         
         this.nextPageButton.style.zIndex = this.options.zIndex.last() + 1;
         
-        this.nextPageButton.iePNGFix();
+        this.nextPageButton.iePNGFix(this.options.iePNGFixBlankPixel,this.options.iePNGFixSizingMethod);
         this.nextPageButton.observe("click", nextFunction);
     },
      
@@ -694,7 +694,7 @@ Flow.ScrollBar = Class.create({
         }
         
         this.scrollWidget = this.scrollBar.getElementsBySelector("." + this.options.scrollWidgetClass).first();
-        this.scrollWidget.iePNGFix();
+        this.scrollWidget.iePNGFix(this.options.iePNGFixBlankPixel,this.options.iePNGFixSizingMethod);
         
         this.size = { x: this.scrollBar.getWidth() - this.scrollWidget.getWidth() };
         this.widgetSize = { x: this.scrollWidget.getWidth() };
@@ -1005,6 +1005,10 @@ Flow.DefaultOptions = {
     hideScrollbarDelay: 1000,
     enableClickEvents: false,
     onFocus: function() {},
+    iePNGFix: true,
+    iePNGFixBlankPixel: null,                       // Null, uses iePNGFix default of "/images/blank.gif"
+    iePNGFixSizingMethod: null,                     // Null, uses iePNGFix default of "scaled"
+
     
     // Lazy Loader options
     
