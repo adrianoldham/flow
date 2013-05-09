@@ -55,7 +55,18 @@ Element.addMethods({
             element.style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='" + src + "',sizingMethod='"+ sizingMethod + "')";
             element.setStyle({ background: "none" });
         }
-    }
+    },
+
+   // Adds a closest-method (equivalent to the jQuery method) to all extended Prototype DOM elements
+   closest: function closest (element, cssRule) {
+      var $element = $(element);
+      // Return if we don't find an element to work with.
+      if (!$element) {
+         return;
+      }
+      return $element.match(cssRule) ? $element : $element.up(cssRule);
+   }
+
 });
 
 Array.prototype.index = function(val) {
