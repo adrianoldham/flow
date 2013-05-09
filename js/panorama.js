@@ -56,7 +56,7 @@ var Panorama = Class.create({
     setupContainer: function() {
         this.container.setStyle({
             position: "relative",
-            overflow: "hidden"
+            overflow: this.options.overflow
         });
         
         this.size = { x: this.container.getWidth(), y: this.container.getHeight() };
@@ -320,6 +320,7 @@ Panorama.DefaultOptions = {
     useMouseScroll: false,
     useMouseStop: false,
     zIndex: 100,
+    overflow: "hidden",
     scrollSpeed: 1,
     updateDelay: 0.05,
     mouseScrollDeadZoneSize: 100,
