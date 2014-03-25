@@ -1,7 +1,10 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
 	<title>fixed</title>
@@ -11,56 +14,101 @@
     <script type="text/javascript" charset="utf-8" src="../js/panorama.js"></script>
     <script type="text/javascript" charset="utf-8" src="../js/fixed_panorama.js"></script>
 
-	<style type="text/css" media="screen">
-		#panorama {
-			height: 234px;
-			width: 1024px;
+    <style type="text/css" media="screen">
+        body {
+            background-color: #000;
+            text-align: center;
+        }
+
+        #wrapper {
+            margin: 0 auto;
+            width: 900px;
+            margin-top: 25px;
+            padding: 25px 0 0 0;
+            background-color: #141414;
+            border: 1px solid #222;
+        }
+
+        #panorama {
+            width: 850px;
+            height: 234px;
+            overfixed: hidden;
+            margin: 0 25px;
+        }
+
+        #fixed {
+            padding: 0;
+            margin: 0 auto;
+            position: relative;
+            width: 900px;
+            height: 165px;
+            background: transparent url(images/bg.gif) repeat-x 50% -76px;
+        }
+        
+        #fixed ul.container {
+            width: 850px;
+            height: 160px;
+            overfixed: hidden;
+            margin: 0 0 0 25px;
+            padding: 0;
+        }
+
+        #fixed li {
+            float: left;
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        #fixed li img {
+            width: 100px;
+            height: 100px;
+            margin: 25px 25px 0 0;
+            border: none;
+            border-bottom: 5px solid transparent;
+        }
+
+        #fixed li .focused img {
+            border-color: #f03;
+        }
+
+        #fixed li.first img {
+			margin-left: 0;
 		}
-		
-		#fixed {
-			margin-top: 20px;
+
+        #fixed li.last img {
+			margin-right: 0;
 		}
-		
-		#fixed img {
-			border-style: none;
-			padding-bottom: 5px;
-			margin-right: 5px;
-			border-bottom: 2px solid #fff;
-		}
-		
-		#fixed .focused img {
-			border-color: #aaa;
-		}
-		
-		.paused {
-			background-color: white;
-			padding: 5px;
-			position: absolute;
-			bottom: 15px;
-			right: 15px;
-			line-height: 0.8em;
-			z-index: 101;
-		}
-		
+
 	</style>
 </head>
 
 <body>
+  <div id="wrapper">
 	<div id="panorama">
 	</div>
-	<div id="fixed">
-        <a href="images/pano2.jpg"><img src="images/thumb2.jpg"/></a>
-	</div>
-    <script type="text/javascript" charset="utf-8">
-        function runTest() {
-            var fixedPanorama = new FixedPanorama("fixed", "panorama", "#fixed a", {
+    <div id="fixed">
+        <ul class="container">
+            <li class="first"><a href="images/pano2.jpg"><img src="images/thumb2.jpg"/></a></li>
+            <li><a href="images/pano1.jpg"><img src="images/thumb1.jpg" /></a></li>
+            <li><a href="images/pano2.jpg"><img src="images/thumb2.jpg" /></a></li>
+            <li><a href="images/pano1.jpg"><img src="images/thumb1.jpg" /></a></li>
+            <li><a href="images/pano2.jpg"><img src="images/thumb2.jpg" /></a></li>
+            <li><a href="images/pano1.jpg"><img src="images/thumb1.jpg" /></a></li>
+            <li class="last"><a href="images/pano2.jpg"><img src="images/thumb2.jpg"/></a></li>
+        </ul>
+    </div>
+  </div>
+  <script type="text/javascript" charset="utf-8">
+      function runTest() {
+          var fixedPanorama = new FixedPanorama("fixed", "panorama", "#fixed a", {
 				useMouseScroll: false
 			});
 			
-			fixedPanorama.addFocusEvent(function(e) { e.fire('overflow:click'); console.log(e) ; console.log('Focus has been called'); })
-        }
-        
-        Event.observe(window, "load", runTest);
-    </script>
+			fixedPanorama.addFocusEvent(function(e) { e.fire('overfixed:click'); console.log(e) ; console.log('Focus has been called'); })
+      }
+      
+      Event.observe(window, "load", runTest);
+  </script>
 </body>
 </html>
